@@ -6,7 +6,7 @@ import Time "mo:base/Time";
 
 import Result "mo:base/Result";
 
-shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [(Principal, User.User)]) = {
+shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [Types.DaoFounder]) = {
 
     stable let deployTimeStamp : Int = Time.now();
     stable var masterPlatform = Principal.fromText("aaaaa-aa");
@@ -24,14 +24,14 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [(
     let members = HashMap.init<Principal, Member>();
     for (founder in founders.vals()) {
         let member = {
-            name = founder.1.name;
+            name = founder.name;
             admissionDate = deployTimeStamp;
             enabled = true;
             votedTutoId : [TutoId] = [];
             //score: Nat;
             //account: Account;
         };
-        HashMap.put(members, principalEqual, principalHash, founder.0, member)
+        HashMap.put(members, principalEqual, principalHash, founder.principal, member)
     };
 
     public func isAMember(p : Principal) : async Bool { _isAMember(p) };

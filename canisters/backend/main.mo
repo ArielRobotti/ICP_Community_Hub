@@ -5,20 +5,23 @@ import Array "mo:base/Array";
 import Time "mo:base/Time";
 import Buffer "mo:base/Buffer";
 // import HashMap "mo:base/HashMap";
+import Internal "mo:⛔";
 import HashMap "libs/FunctionalStableHashMap";
 import Result "mo:base/Result";
+
 import Types "Types";
 import { tutoIdHash; tutoIdEqual } = "Types";
 import User "user";
 import Account "account";
+import Dao "Dao";
 
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Bool "mo:base/Bool";
 
-shared ({ caller }) actor class ICPTutorials() = {
+shared ({ caller }) actor class ICP_Community_Hub() = {
 
-  let DAO = Principal.fromText("aaaaa-aa");
+  stable var DAO = Principal.fromText("aaaaa-aa");
 
   public type Tutorial = Types.Tutorial;
   public type Publication = Types.Publication;
@@ -29,6 +32,8 @@ shared ({ caller }) actor class ICPTutorials() = {
   public type TutoId = Nat;
   public type UserId = Nat;
   public type UserSettings = User.UserSettings;
+  public type DaoFounder = Types.DaoFounder;
+  
 
   stable var currentUserId = 0;
   stable var currentTutorialId = 0;
@@ -41,7 +46,17 @@ shared ({ caller }) actor class ICPTutorials() = {
   stable let incomingPublications = HashMap.init<TutoId, Publication>();
   stable let aprovedPublications = HashMap.init<TutoId, Publication>();
 
-  // public shared ({caller}) func deployDaoCanister();
+
+  // -------------- Funcion para desplegar el canister de la DAO ----------- 
+  public shared ({ caller }) func deployDaoCanister(_name: Text, _manifesto: Text, founders: [DaoFounder], extraFees: Nat) : async Principal {
+    assert (Principal.isController(caller));
+    assert (DAO == Principal.fromText("aaaaa-aa"));
+    Internal.cyclesAdd(13_846_199_230 + extraFees); //FEE para crear un canister 13 846 199 230
+    let daoCanister = await Dao.Dao(_name, _manifesto, founders);   // se crea un canister para la DAO
+    DAO := Principal.fromActor(daoCanister);
+    DAO;
+  };
+  // -------------------------------------------------------------------------
 
   public query func getUsers() : async [User] {
     Iter.toArray<User>(HashMap.vals(users))
