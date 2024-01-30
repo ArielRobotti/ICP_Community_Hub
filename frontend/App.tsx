@@ -22,7 +22,7 @@ import Footer from "./components/layout/Footer"
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className="App dark:bg-slate-800 dark:text-white">
         <Navbar></Navbar>
         <Routes>
           <Route path="/" Component={Home}></Route>
