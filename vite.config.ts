@@ -12,7 +12,7 @@ interface CanisterIds {
   [key: string]: { [key in Network]: string }
 }
 
-let canisterIds: CanisterIds
+let canisterIds: CanisterIds = {};
 try {
   canisterIds = JSON.parse(
     fs

@@ -10,11 +10,10 @@ import "@connect2ic/core/style.css"
 /*
  * Import canister definitions like this:
  */
-import * as counter from "../.dfx/local/canisters/counter"
+//import * as counter from "../.dfx/local/canisters/counter"
 /*
  * Some examples to get you started
  */
-import { Counter } from "./components/Counter"
 import { Transfer } from "./components/Transfer"
 import { Profile } from "./components/Profile"
 
@@ -38,7 +37,6 @@ function App() {
         Examples
       </p>
       <div className="examples">
-        <Counter />
         <Profile />
         <Transfer />
       </div>
@@ -47,9 +45,7 @@ function App() {
 }
 
 const client = createClient({
-  canisters: {
-    counter,
-  },
+  canisters: {},
   providers: defaultProviders,
   globalProviderConfig: {
     dev: import.meta.env.DEV,
