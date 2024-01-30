@@ -21,11 +21,9 @@ import Bool "mo:base/Bool";
 
 shared ({ caller }) actor class ICP_Community_Hub() = {
 
-  stable var DAO = Principal.fromText("aaaaa-aa");
-
   public type Tutorial = Types.Tutorial;
   public type Publication = Types.Publication;
-  public type Account = Account.Account;
+  // public type Account = Account.Account;
   public type User = User.User;
   public type SignUpResult = Result.Result<User, User.SignUpErrors>;
   public type PublishResult = Result.Result<Publication, Text>;
@@ -46,20 +44,44 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
   stable let incomingPublications = HashMap.init<TutoId, Publication>();
   stable let aprovedPublications = HashMap.init<TutoId, Publication>();
 
+  stable var DAO = Principal.fromText("aaaaa-aa");
 
-  // -------------- Funcion para desplegar el canister de la DAO ----------- 
+  // -------------- Funcion para desplegar el canister de la DAO -----------
+
   public shared ({ caller }) func deployDaoCanister(_name: Text, _manifesto: Text, founders: [DaoFounder], extraFees: Nat) : async Principal {
-    assert (Principal.isController(caller));
-    assert (DAO == Principal.fromText("aaaaa-aa"));
+    //Considerando que esta función será ejecutada una única vez, se sugiere ejecutarla directamente desde el CLI para
+    //ahorrar tiempos asociados al desarrollo de un formulario en el front.
+    //Ante un segundo intento de ejecución, un assertion error será lanzado; 
+    //Evaluar la posibilidad de devolver #err(Text) indicando el Principal ID de la Dao en este caso
+    //  execution example using dfx CLI 
+     /* dfx canister call backend deployDaoCanister '("<DaoName>", "Manifiesto", vec { 
+          record { 
+            name = "Ariel";
+            "principal" = principal "<Principal ID de Ariel>";
+          };
+          record {
+            name = "Daniel";
+            "principal" = principal "<Principal ID de Daniel>"; 
+          };
+          record { 
+            name = "Juan";
+            "principal" = principal "<Principal ID Juan>"; 
+          };
+
+      }, 0)' */
+    // 3_150 additional cycles fueron solicitados. Repetir la ejecutcion colocando dicho valor en el ultimo
+    //parametro de la llamada en lugar del 0
+    assert (isAdmin(caller));
+    assert (not daoIsDeployed()); // impide que la función se ejecute mas de una vez 
     Internal.cyclesAdd(13_846_199_230 + extraFees); //FEE para crear un canister 13 846 199 230
     let daoCanister = await Dao.Dao(_name, _manifesto, founders);   // se crea un canister para la DAO
     DAO := Principal.fromActor(daoCanister);
     DAO;
   };
-  // -------------------------------------------------------------------------
 
-  public query func getUsers() : async [User] {
-    Iter.toArray<User>(HashMap.vals(users))
+  // -------------------------- Private Fuctions -------------------------------
+  func daoIsDeployed(): Bool{
+    Principal.fromText("aaaaa-aa") != DAO;
   };
 
   func inBlackList(p : Principal) : Bool {
@@ -68,12 +90,70 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
       case _ { true }
     }
   };
+
   func isAdmin(p : Principal) : Bool {
     for (a in admins.vals()) {
       if (a == p) { return true }
     };
     false
   };
+
+  func isUser(p : Principal) : Bool {
+    return switch (HashMap.get(userIds, Principal.equal, Principal.hash, p)) {
+      case null { false };
+      case _ { true }
+    }
+  };
+
+  func getUser(p : Principal) : ?User {
+    switch (HashMap.get(userIds, Principal.equal, Principal.hash, p)) {
+      case null { null };
+      case (?userId) { HashMap.get(users, Nat.equal, Nat32.fromNat, userId) }
+    }
+  };
+
+  func validateEjecution(_caller: Principal): (){
+    if (daoIsDeployed()) { 
+      assert _caller == DAO //Si la DAO está desplegada y _caller no es la DAO lanza un assertion error
+    } else {
+      (assert isAdmin(_caller)); //Si la DAO NO está desplegada y _caller no es un admin lanza un error
+    };
+  };
+
+
+  //----- if DAO, only DAO, else only admins -----------------------------------
+
+  public shared ({ caller }) func aprovePublication(id : Nat) : async Result.Result<(), Text> {
+    validateEjecution(caller);
+
+    let pub = HashMap.remove(incomingPublications, tutoIdEqual, tutoIdHash, id);
+    switch (pub) {
+      case null { return #err("Tutorial id does not exist") };
+      case (?tuto) {
+        HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, id, tuto);
+        return #ok()
+      }
+    }
+  };
+
+  public shared ({ caller }) func rejectPublication(id : Nat) : async Result.Result<(), Text> {
+    validateEjecution(caller);
+
+    let pub = HashMap.remove(incomingPublications, tutoIdEqual, tutoIdHash, id);
+    return switch (pub) {
+      case null { #err("Tutorial id does not exist") };
+      case (_) { #ok() }
+    }
+  };
+
+  public shared ({ caller }) func getIncomingPublication() : async [Publication] {
+    validateEjecution(caller);
+    return Iter.toArray(HashMap.vals(incomingPublications))
+  };
+
+  
+
+  //----------- Only Admins functions -----------------------------------------------
 
   public shared ({ caller }) func addAdmin(p : Text) : async Bool {
     assert (isAdmin(caller));
@@ -85,7 +165,10 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     true
   };
 
-  public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
+  
+  //----------------- Public shared functions ---------------------------------------
+
+    public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
     //TODO: Validación de campos
     if (Principal.isAnonymous(caller)) { return #err(#CallerAnnonymous) };
     if (inBlackList(caller)) { return #err(#InBlackList) };
@@ -113,13 +196,15 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     }
   };
 
-  public shared ({ caller }) func isRegistered() : async Bool {
+  public shared ({ caller }) func iamRegistered() : async Bool {
     return switch (HashMap.get(userIds, Principal.equal, Principal.hash, caller)) {
       case null { false };
       case _ { true }
     }
   };
+
   public shared ({ caller }) func getMiId() : async ?Nat {
+    assert not Principal.isAnonymous(caller);
     HashMap.get(userIds, Principal.equal, Principal.hash, caller)
   };
 
@@ -162,7 +247,6 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
           votedPosts = user.votedPosts;
           admissionDate = user.admissionDate
         };
-        // users.put(userId,updateUser);
         HashMap.put<UserId, User>(users, Nat.equal, Nat32.fromNat, userId, updateUser)
       }
     }
@@ -192,13 +276,6 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     }
   };
 
-  func isUser(p : Principal) : Bool {
-    return switch (HashMap.get(userIds, Principal.equal, Principal.hash, p)) {
-      case null { false };
-      case _ { true }
-    }
-  };
-
   public shared ({ caller }) func publish(content : Tutorial) : async PublishResult {
     switch (HashMap.get(userIds, Principal.equal, Principal.hash, caller)) {
       case null { return #err("Caller is not a member") };
@@ -218,43 +295,13 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
       }
     }
   };
+  //---------------------------------------------------------------------------------
 
-  func getUser(p : Principal) : ?User {
-    switch (HashMap.get(userIds, Principal.equal, Principal.hash, p)) {
-      case null { null };
-      case (?userId) { HashMap.get(users, Nat.equal, Nat32.fromNat, userId) }
-    }
-  };
+  //---------------- Query functions ------------------------------------------------
 
-  public shared ({ caller }) func aprovePublication(id : Nat) : async Result.Result<(), Text> {
-    // assert (caller != DAO);
-    assert (isAdmin(caller));
-
-    let pub = HashMap.remove(incomingPublications, tutoIdEqual, tutoIdHash, id);
-    switch (pub) {
-      case null { return #err("Tutorial id does not exist") };
-      case (?tuto) {
-        HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, id, tuto);
-        return #ok()
-      }
-    }
-  };
-
-  public shared ({ caller }) func rejectPublication(id : Nat) : async Result.Result<(), Text> {
-    //assert (caller != DAO);
-    assert (isAdmin(caller));
-    let pub = HashMap.remove(incomingPublications, tutoIdEqual, tutoIdHash, id);
-    return switch (pub) {
-      case null { #err("Tutorial id does not exist") };
-      case (_) { #ok() }
-    }
-  };
-
-  public shared ({ caller }) func getIncomingPublication() : async [Publication] {
-    //assert (caller != DAO);
-    assert (isAdmin(caller));
-    return Iter.toArray(HashMap.vals(incomingPublications))
-  };
+  public query func getUsers() : async [User] { //Public??
+    Iter.toArray<User>(HashMap.vals(users))
+  };  
 
   public query func getAprovedPublication() : async [(TutoId, Publication)] {
     return Iter.toArray(HashMap.entries(aprovedPublications))

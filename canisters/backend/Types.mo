@@ -7,8 +7,8 @@ module {
     };
 
     public type DaoFounder = {
+        name : Text;
         principal : Principal;
-        name : Text
     };
 
     public type Member = {
