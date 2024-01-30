@@ -1,0 +1,82 @@
+type UserSettings = 
+ record {
+   avatar: opt blob;
+   country: opt text;
+   email: opt text;
+   name: opt text;
+ };
+type User = 
+ record {
+   admissionDate: int;
+   avatar: opt blob;
+   country: opt text;
+   email: opt text;
+   name: text;
+   votedPosts: vec nat;
+ };
+type Tutorial__1 = 
+ record {
+   assets: vec blob;
+   html: text;
+   tags: vec text;
+   title: text;
+ };
+type Tutorial = 
+ record {
+   assets: vec blob;
+   html: text;
+   tags: vec text;
+   title: text;
+ };
+type TutoId = nat;
+type SignUpResult = 
+ variant {
+   err: SignUpErrors;
+   ok: User;
+ };
+type SignUpErrors = 
+ variant {
+   CallerAnnonymous;
+   InBlackList;
+   IsAlreadyAMember;
+ };
+type Result = 
+ variant {
+   err: text;
+   ok;
+ };
+type PublishResult = 
+ variant {
+   err: text;
+   ok: Publication;
+ };
+type Publication = 
+ record {
+   autor: nat;
+   content: Tutorial;
+   date: int;
+   score: opt float64;
+ };
+type ICPTutorials = 
+ service {
+   addAdmin: (text) -> (bool);
+   aprovePublication: (nat) -> (Result);
+   getAprovedPublication: () -> (vec record {
+                                       TutoId;
+                                       Publication;
+                                     }) query;
+   getIncomingPublication: () -> (vec Publication);
+   getMiId: () -> (opt nat);
+   getMiUser: () -> (opt User);
+   getPubByID: (nat) -> (opt Publication) query;
+   getPubFromUser: (nat) -> (vec Publication) query;
+   getUsers: () -> (vec User) query;
+   isRegistered: () -> (bool);
+   loadAvatar: (blob) -> (opt blob);
+   publish: (Tutorial__1) -> (PublishResult);
+   rejectPublication: (nat) -> (Result);
+   search: (text) -> (vec Publication) query;
+   signUp: (text, opt text, opt blob) -> (SignUpResult);
+   userConfig: (UserSettings) -> ();
+ };
+service : () -> ICPTutorials
