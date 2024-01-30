@@ -4,14 +4,16 @@ import { ConnectButton, ConnectDialog } from "@connect2ic/react"
 const Navbar = () => {
 
     return (
-        <>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#dao">DAO</a></li>
-                <ConnectButton />
+        <div className="w-full h-20 flex flex-col justify-center border-b border-b-gray-200">
+            <div className="flex items-center justify-between px-20">
+            <ul className="w-100 flex flex-row gap-5">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">DAO</a></li>
             </ul>
+            <ConnectButton />
+            </div>
             <ConnectDialog />
-        </>
+        </div>
     )
 }
 
