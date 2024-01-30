@@ -1,5 +1,4 @@
 import React from "react"
-import logo from "./assets/dfinity.svg"
 /*
  * Connect2ic provides essential utilities for IC app development
  */
@@ -16,15 +15,19 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 /*
  * Some examples to get you started
  */
-import { Profile } from "./components/Profile"
+import { Home } from "./pages/home"
+import Navbar from "./components/layout/Navbar"
+import Footer from "./components/layout/Footer"
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <Navbar></Navbar>
         <Routes>
-          <Route path="/" Component={Profile}></Route>
+          <Route path="/" Component={Home}></Route>
         </Routes>
+        <Footer></Footer>
       </div>
     </Router>
   )
