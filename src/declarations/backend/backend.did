@@ -57,10 +57,11 @@ type Publication =
    date: int;
    score: opt float64;
  };
-type ICPTutorials = 
+type ICP_Community_Hub = 
  service {
    addAdmin: (text) -> (bool);
    aprovePublication: (nat) -> (Result);
+   deployDaoCanister: (text, text, vec DaoFounder, nat) -> (principal);
    getAprovedPublication: () -> (vec record {
                                        TutoId;
                                        Publication;
@@ -71,7 +72,7 @@ type ICPTutorials =
    getPubByID: (nat) -> (opt Publication) query;
    getPubFromUser: (nat) -> (vec Publication) query;
    getUsers: () -> (vec User) query;
-   isRegistered: () -> (bool);
+   iamRegistered: () -> (bool);
    loadAvatar: (blob) -> (opt blob);
    publish: (Tutorial__1) -> (PublishResult);
    rejectPublication: (nat) -> (Result);
@@ -79,4 +80,9 @@ type ICPTutorials =
    signUp: (text, opt text, opt blob) -> (SignUpResult);
    userConfig: (UserSettings) -> ();
  };
-service : () -> ICPTutorials
+type DaoFounder = 
+ record {
+   name: text;
+   "principal": principal;
+ };
+service : () -> ICP_Community_Hub

@@ -2,9 +2,14 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
-export interface ICPTutorials {
+export interface DaoFounder { 'principal' : Principal, 'name' : string }
+export interface ICP_Community_Hub {
   'addAdmin' : ActorMethod<[string], boolean>,
   'aprovePublication' : ActorMethod<[bigint], Result>,
+  'deployDaoCanister' : ActorMethod<
+    [string, string, Array<DaoFounder>, bigint],
+    Principal
+  >,
   'getAprovedPublication' : ActorMethod<[], Array<[TutoId, Publication]>>,
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
@@ -12,7 +17,7 @@ export interface ICPTutorials {
   'getPubByID' : ActorMethod<[bigint], [] | [Publication]>,
   'getPubFromUser' : ActorMethod<[bigint], Array<Publication>>,
   'getUsers' : ActorMethod<[], Array<User>>,
-  'isRegistered' : ActorMethod<[], boolean>,
+  'iamRegistered' : ActorMethod<[], boolean>,
   'loadAvatar' : ActorMethod<
     [Uint8Array | number[]],
     [] | [Uint8Array | number[]]
@@ -68,5 +73,5 @@ export interface UserSettings {
   'email' : [] | [string],
   'avatar' : [] | [Uint8Array | number[]],
 }
-export interface _SERVICE extends ICPTutorials {}
+export interface _SERVICE extends ICP_Community_Hub {}
 export declare const idlFactory: IDL.InterfaceFactory;

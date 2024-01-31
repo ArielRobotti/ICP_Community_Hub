@@ -1,5 +1,9 @@
 export const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const DaoFounder = IDL.Record({
+    'principal' : IDL.Principal,
+    'name' : IDL.Text,
+  });
   const TutoId = IDL.Nat;
   const Tutorial = IDL.Record({
     'title' : IDL.Text,
@@ -40,9 +44,14 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Opt(IDL.Text),
     'avatar' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
-  const ICPTutorials = IDL.Service({
+  const ICP_Community_Hub = IDL.Service({
     'addAdmin' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'aprovePublication' : IDL.Func([IDL.Nat], [Result], []),
+    'deployDaoCanister' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Vec(DaoFounder), IDL.Nat],
+        [IDL.Principal],
+        [],
+      ),
     'getAprovedPublication' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(TutoId, Publication))],
@@ -54,7 +63,7 @@ export const idlFactory = ({ IDL }) => {
     'getPubByID' : IDL.Func([IDL.Nat], [IDL.Opt(Publication)], ['query']),
     'getPubFromUser' : IDL.Func([IDL.Nat], [IDL.Vec(Publication)], ['query']),
     'getUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
-    'isRegistered' : IDL.Func([], [IDL.Bool], []),
+    'iamRegistered' : IDL.Func([], [IDL.Bool], []),
     'loadAvatar' : IDL.Func(
         [IDL.Vec(IDL.Nat8)],
         [IDL.Opt(IDL.Vec(IDL.Nat8))],
@@ -70,6 +79,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'userConfig' : IDL.Func([UserSettings], [], []),
   });
-  return ICPTutorials;
+  return ICP_Community_Hub;
 };
 export const init = ({ IDL }) => { return []; };

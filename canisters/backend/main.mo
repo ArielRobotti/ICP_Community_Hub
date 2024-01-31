@@ -23,6 +23,7 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
 
   public type Tutorial = Types.Tutorial;
   public type Publication = Types.Publication;
+  public type Comment = Types.Comment;
   // public type Account = Account.Account;
   public type User = User.User;
   public type SignUpResult = Result.Result<User, User.SignUpErrors>;
@@ -285,7 +286,8 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
           autor = userId;
           date;
           content;
-          score = null
+          score = null;
+          comments = [];
         };
         // incomingPublications.put(currentTutorialId, pub);
         HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, currentTutorialId, pub);
@@ -295,6 +297,47 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
       }
     }
   };
+
+  public shared ({caller}) func addCommentPost(_id: TutoId, comment: Comment): async Bool{
+    assert (isUser(caller));
+    switch(HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)){
+      case null {return false};
+      case (?pub){
+        let commentBuffer = Buffer.fromArray<Comment>(pub.comments);
+        commentBuffer.add(comment);
+        let updatePub = {
+          autor = pub.autor;
+          date = pub.date;
+          content = pub.content;
+          score = pub.score;
+          comments = Buffer.toArray(commentBuffer);
+        };
+        HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
+        return true;
+      };
+    }
+  };
+
+  public shared ({caller}) func deleteComment(_id: TutoId, comment: Comment): async Bool{
+    assert (isUser(caller));
+    switch(HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)){
+      case null {return false};
+      case (?pub){
+        var index = 0;
+        for(p in pub.comments.vals()){
+          if(p.id == _id){
+            assert(p.autor == caller);
+            let commentsUpdate = Buffer.fromArray<Comment>(pub.comments);
+            ignore commentsUpdate.remove(index);
+            return true;
+          };
+          index += 1;
+        };
+        return false;
+      };
+    };
+  };
+
   //---------------------------------------------------------------------------------
 
   //---------------- Query functions ------------------------------------------------

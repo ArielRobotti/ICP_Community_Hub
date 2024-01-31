@@ -45,7 +45,15 @@ module {
         autor : Nat;
         date : Int; //Timestamp
         content : Tutorial;
-        score : ?Float
+        score : ?Float;
+        comments: [Comment];
     };
+
+    public type Comment = {
+        id: Nat;
+        autor : Principal;
+        content : Text;
+        // date : Int;
+    }
 
 }
