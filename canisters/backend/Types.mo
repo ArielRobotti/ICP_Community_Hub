@@ -45,7 +45,8 @@ module {
         autor : Nat;
         date : Int; //Timestamp
         content : Tutorial;
-        score : ?Float;
+        qualifyQty: Nat;
+        qualifySum: Nat;
         comments: [Comment];
     };
 

@@ -32,12 +32,10 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
   public type UserId = Nat;
   public type UserSettings = User.UserSettings;
   public type DaoFounder = Types.DaoFounder;
-  
 
   stable var currentUserId = 0;
   stable var currentTutorialId = 0;
   stable var admins : [Principal] = [caller];
-
 
   stable let userIds = HashMap.init<Principal, UserId>();
   stable let users = HashMap.init<UserId, User>();
@@ -49,40 +47,40 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
 
   // -------------- Funcion para desplegar el canister de la DAO -----------
 
-  public shared ({ caller }) func deployDaoCanister(_name: Text, _manifesto: Text, founders: [DaoFounder], extraFees: Nat) : async Principal {
+  public shared ({ caller }) func deployDaoCanister(_name : Text, _manifesto : Text, founders : [DaoFounder], extraFees : Nat) : async Principal {
     //Considerando que esta función será ejecutada una única vez, se sugiere ejecutarla directamente desde el CLI para
     //ahorrar tiempos asociados al desarrollo de un formulario en el front.
-    //Ante un segundo intento de ejecución, un assertion error será lanzado; 
+    //Ante un segundo intento de ejecución, un assertion error será lanzado;
     //Evaluar la posibilidad de devolver #err(Text) indicando el Principal ID de la Dao en este caso
-    //  execution example using dfx CLI 
-     /* dfx canister call backend deployDaoCanister '("<DaoName>", "Manifiesto", vec { 
-          record { 
+    //  execution example using dfx CLI
+    /* dfx canister call backend deployDaoCanister '("<DaoName>", "Manifiesto", vec {
+          record {
             name = "Ariel";
             "principal" = principal "<Principal ID de Ariel>";
           };
           record {
             name = "Daniel";
-            "principal" = principal "<Principal ID de Daniel>"; 
+            "principal" = principal "<Principal ID de Daniel>";
           };
-          record { 
+          record {
             name = "Juan";
-            "principal" = principal "<Principal ID Juan>"; 
+            "principal" = principal "<Principal ID Juan>";
           };
 
       }, 0)' */
     // 3_150 additional cycles fueron solicitados. Repetir la ejecutcion colocando dicho valor en el ultimo
     //parametro de la llamada en lugar del 0
     assert (isAdmin(caller));
-    assert (not daoIsDeployed()); // impide que la función se ejecute mas de una vez 
+    assert (not daoIsDeployed()); // impide que la función se ejecute mas de una vez
     Internal.cyclesAdd(13_846_199_230 + extraFees); //FEE para crear un canister 13 846 199 230
-    let daoCanister = await Dao.Dao(_name, _manifesto, founders);   // se crea un canister para la DAO
+    let daoCanister = await Dao.Dao(_name, _manifesto, founders); // se crea un canister para la DAO
     DAO := Principal.fromActor(daoCanister);
-    DAO;
+    DAO
   };
 
   // -------------------------- Private Fuctions -------------------------------
-  func daoIsDeployed(): Bool{
-    Principal.fromText("aaaaa-aa") != DAO;
+  func daoIsDeployed() : Bool {
+    Principal.fromText("aaaaa-aa") != DAO
   };
 
   func inBlackList(p : Principal) : Bool {
@@ -113,14 +111,13 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     }
   };
 
-  func validateEjecution(_caller: Principal): (){
-    if (daoIsDeployed()) { 
+  func validateEjecution(_caller : Principal) : () {
+    if (daoIsDeployed()) {
       assert _caller == DAO //Si la DAO está desplegada y _caller no es la DAO lanza un assertion error
     } else {
       (assert isAdmin(_caller)); //Si la DAO NO está desplegada y _caller no es un admin lanza un error
-    };
+    }
   };
-
 
   //----- if DAO, only DAO, else only admins -----------------------------------
 
@@ -152,8 +149,6 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     return Iter.toArray(HashMap.vals(incomingPublications))
   };
 
-  
-
   //----------- Only Admins functions -----------------------------------------------
 
   public shared ({ caller }) func addAdmin(p : Text) : async Bool {
@@ -166,10 +161,9 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     true
   };
 
-  
   //----------------- Public shared functions ---------------------------------------
 
-    public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
+  public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
     //TODO: Validación de campos
     if (Principal.isAnonymous(caller)) { return #err(#CallerAnnonymous) };
     if (inBlackList(caller)) { return #err(#InBlackList) };
@@ -286,8 +280,9 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
           autor = userId;
           date;
           content;
-          score = null;
-          comments = [];
+          qualifyQty = 0;
+          qualifySum = 0;
+          comments = []
         };
         // incomingPublications.put(currentTutorialId, pub);
         HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, currentTutorialId, pub);
@@ -298,53 +293,55 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     }
   };
 
-  public shared ({caller}) func addCommentPost(_id: TutoId, comment: Comment): async Bool{
+  public shared ({ caller }) func addCommentPost(_id : TutoId, comment : Comment) : async Bool {
     assert (isUser(caller));
-    switch(HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)){
-      case null {return false};
-      case (?pub){
+    switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
+      case null { return false };
+      case (?pub) {
         let commentBuffer = Buffer.fromArray<Comment>(pub.comments);
         commentBuffer.add(comment);
         let updatePub = {
           autor = pub.autor;
           date = pub.date;
           content = pub.content;
-          score = pub.score;
-          comments = Buffer.toArray(commentBuffer);
+          qualifyQty = pub.qualifyQty;
+          qualifySum = pub.qualifySum;
+          comments = Buffer.toArray(commentBuffer)
         };
         HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
-        return true;
-      };
+        return true
+      }
     }
   };
 
-  public shared ({caller}) func deleteComment(_id: TutoId, comment: Comment): async Bool{
+  public shared ({ caller }) func deleteComment(_id : TutoId, comment : Comment) : async Bool {
     assert (isUser(caller));
-    switch(HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)){
-      case null {return false};
-      case (?pub){
+    switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
+      case null { return false };
+      case (?pub) {
         var index = 0;
-        for(p in pub.comments.vals()){
-          if(p.id == _id){
-            assert(p.autor == caller);
+        for (p in pub.comments.vals()) {
+          if (p.id == _id) {
+            assert (p.autor == caller);
             let commentsUpdate = Buffer.fromArray<Comment>(pub.comments);
             ignore commentsUpdate.remove(index);
-            return true;
+            return true
           };
-          index += 1;
+          index += 1
         };
-        return false;
-      };
-    };
+        return false
+      }
+    }
   };
 
   //---------------------------------------------------------------------------------
 
   //---------------- Query functions ------------------------------------------------
 
-  public query func getUsers() : async [User] { //Public??
+  public query func getUsers() : async [User] {
+    //Public??
     Iter.toArray<User>(HashMap.vals(users))
-  };  
+  };
 
   public query func getAprovedPublication() : async [(TutoId, Publication)] {
     return Iter.toArray(HashMap.entries(aprovedPublications))
@@ -385,27 +382,33 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     Buffer.toArray<Publication>(tempBuffer)
   };
 
-
-
-  /*
-  func inArray<T>(a: [T], e: T): Bool{
-    for(elem in a.vals()){
-      if(elem == e){return true};
-    };
-    return false;
-  };
-
-  public shared ({caller}) func qualify(id: TutoId, q: Nat): async Bool{
-    switch(getUser(caller)){
-      case null {return false };
-      case(?user){
-        if(inArray<TutoId>(user.votedPosts, id)){
-          return false;
+  public shared ({ caller }) func qualifyPost(_id : TutoId, q : Nat) : async Bool {
+    assert (q >= 1 and q <= 5);
+    switch (getUser(caller)) {
+      case (?user) {
+        for (postId in user.votedPosts.vals()) {
+          if (postId == _id) {
+            return false
+          }
         };
-
+        switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
+          case (?pub) {
+            let updatePub = {
+              autor = pub.autor;
+              date = pub.date;
+              content = pub.content;
+              qualifyQty = pub.qualifyQty + 1;
+              qualifySum = pub.qualifySum + q;
+              comments = pub.comments;
+            };
+            HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
+            return true;
+          };
+          case _ { return false }
+        }
       };
-    };
+      case _ { return false }
+    }
   };
-  */
 
 }
