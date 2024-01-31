@@ -10,6 +10,7 @@
     "@connect2ic/core": "^0.1.1",
     "@connect2ic/react": "^0.1.0",
     "@dfinity/agent": "^0.11.3",
+    "classnames": "^2.5.1",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.21.3"

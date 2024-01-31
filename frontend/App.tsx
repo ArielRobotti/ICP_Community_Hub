@@ -15,9 +15,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 /*
  * Some examples to get you started
  */
-import { Home } from "./pages/home"
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
+import { Home } from "./pages/home"
+import { New } from "./pages/tutorials/new"
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Navbar></Navbar>
         <Routes>
           <Route path="/" Component={Home}></Route>
+          <Route path="/tutorials/new" Component={New}></Route>
         </Routes>
         <Footer></Footer>
       </div>

@@ -22,7 +22,7 @@ const Home = () => {
         </h1>
         <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-100">
           Learn from the best, create your own courses, tutorials, ask your
-          questions and receive answer to your questions. All in one hub.
+          questions, answer and get answers. All in one hub.
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <a
