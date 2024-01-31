@@ -1,6 +1,8 @@
 import Types "Types";
 import Principal "mo:base/Principal";
 import HashMap "libs/FunctionalStableHashMap";
+import Array "mo:base/Array";
+import Iter "mo:base/Iter";
 import User "user";
 import Time "mo:base/Time";
 
@@ -8,18 +10,26 @@ import Result "mo:base/Result";
 
 shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [Types.DaoFounder]) = {
 
-    stable let deployTimeStamp : Int = Time.now();
-    stable var masterPlatform = Principal.fromText("aaaaa-aa");
-
+    type VotingStatus = Types.VotingStatus;
     type Member = Types.Member;
     type TutoId = Types.TutoId;
     type Mode = Types.Mode;
+    type Publication = Types.Publication;
     type updateMembersResult = Result.Result<?Member, Text>;
+
+    let tutoIdHash = Types.tutoIdHash;
+    let tutoIdEqual = Types.tutoIdEqual;
     let principalHash = Principal.hash;
     let principalEqual = Principal.equal;
 
-    public func getName() : async Text { name };
-    public func getManifesto() : async Text { manifesto };
+    stable let deployTimeStamp : Int = Time.now();
+    stable var masterPlatform = caller; //Principal de la plataforma principal
+    stable let postsInTheVotingProcess = HashMap.init<TutoId, VotingStatus>();
+    stable var votingPeriod = 259000; // Plazo de 3 dias para votar
+
+    public query func getName() : async Text { name };
+    public query func getManifesto() : async Text { manifesto };
+    public query func getmembersQty() : async Nat { HashMap.size(members) };
 
     let members = HashMap.init<Principal, Member>();
     for (founder in founders.vals()) {
@@ -45,8 +55,8 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
 
     public shared ({ caller }) func addMember(p : Principal, name : Text) : async Bool {
         assert (caller == masterPlatform);
-        if (_isAMember(p)) { 
-            return false;
+        if (_isAMember(p)) {
+            return false
         };
         let admissionDate = Time.now();
         let member = {
@@ -90,6 +100,86 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
                 return true
             }
         }
+    };
+
+    // ----------------- Intercation with masterCanister -----------------------------
+
+    // public shared ({ caller }) func getIncomingPublication() : async [Publication] {
+    //     assert (_isAMember(caller));
+    //     let masterActor = actor (Principal.toText(masterPlatform)) : actor {
+    //         getIncomingPublication : shared () -> async [Publication]
+    //     };
+    //     await masterActor.getIncomingPublication()
+    // };
+
+    public shared ({ caller }) func votePublication(_id : TutoId, _date : Int, _vote : Bool) : async Bool {
+        //Vulnerabilidad critica. TODO Evitar que se puedan hacer llamadas con datos falsos
+        //Desde el front se envia el Id de la publicacioón, su campo date y el voto del miembro de la DAO
+        switch (HashMap.get(members, principalEqual, principalHash, caller)) {
+            case null { return false };
+            case (?member) {
+                let currentDate = Time.now() / 1_000_000_000 : Int;
+
+                for (id in member.votedTutoId.vals()) {
+                    if (id == _id) { return false }
+                };
+
+                let status = switch (HashMap.get(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id)) {
+                    case null {
+                        {
+                            startRound = _date; //Timestamp de la publicación
+                            votes = 1;
+                            balance = if (_vote) { 1 } else { -1 };
+                            end = false;
+                        }
+                    };
+                    case (?oldStatus) {
+                        if (_date != oldStatus.startRound) {
+                            return false
+                        };
+                        let vote = if (_vote) { 1 : Int } else { -1 : Int };
+                        {
+                            startRound = _date; //Timestamp de la publicación
+                            votes = oldStatus.votes + 1;
+                            balance = oldStatus.balance + vote;
+                            end = false;
+                        }
+                    }
+                };
+                HashMap.put(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id, status);
+                await tryPublicate(_id, currentDate);
+                return true
+            }
+        }
+    };
+
+    func tryPublicate(_id : TutoId, _currentDate : Int): async () {
+        switch (HashMap.get(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id)) {
+            case null {};
+            case (?pub){
+                if(pub.end) {return};
+                if (pub.startRound + votingPeriod > _currentDate) {
+                    let masterActor = actor (Principal.toText(masterPlatform)) : actor {
+                            aprovePublication : shared (TutoId) -> async Result.Result<(), Text>;
+                            rejectPublication: shared (Nat) -> async Result.Result<(), Text>;
+                        };
+                    if (pub.balance >= 0) {
+                        ignore await masterActor.aprovePublication(_id);
+                    } 
+                    else {
+                        ignore masterActor.rejectPublication(_id);
+                    };
+
+                    let status = {
+                        startRound = pub.startRound;
+                        votes = pub.votes;
+                        balance = pub.balance;
+                        end = true;
+                    };
+                    HashMap.put(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id, status);
+                };
+            };
+        };
     };
 
 }

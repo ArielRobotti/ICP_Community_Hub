@@ -2,10 +2,6 @@ import Nat32 "mo:base/Nat32";
 import HashMap "mo:base/HashMap";
 module {
 
-    public type DaoInit = {
-
-    };
-
     public type DaoFounder = {
         name : Text;
         principal : Principal;
@@ -18,6 +14,13 @@ module {
         enabled : Bool;
         //score: Nat;
         //account: Account;
+    };
+
+    public type VotingStatus = {
+        startRound: Int; //Timestamp de la publicación
+        votes: Nat;
+        balance: Int;
+        end: Bool;
     };
 
     public type Mode = {
