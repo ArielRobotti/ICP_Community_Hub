@@ -271,10 +271,10 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
             };
             HashMap.put(users, Nat.equal, Nat32.fromNat, userId, userUpdate);
             return userUpdate.avatar
-          }
-        }
-      }
-    }
+          };
+        };
+      };
+    };
   };
 
   public shared ({ caller }) func publish(content : Tutorial) : async PublishResult {
@@ -292,8 +292,8 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
         };
         HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, generateId(), pub);
         #ok(pub)
-      }
-    }
+      };
+    };
   };
 
   public shared ({ caller }) func addCommentPost(_id : TutoId, content : Text) : async Bool {
@@ -320,8 +320,8 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
         };
         HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
         return true
-      }
-    }
+      };
+    };
   };
 
   public shared ({ caller }) func editComment(_id : TutoId, _commentId : Nat, _updateContent : Text) : async Bool {
@@ -343,7 +343,6 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
               date = old.date
             };
             commentsUpdate.add(updateComment);
-
             let updatePub = {
               autor = pub.autor;
               date = pub.autor;
@@ -358,8 +357,8 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
           index += 1
         };
         return false
-      }
-    }
+      };
+    };
   };
 
   public shared ({ caller }) func deleteComment(_id : TutoId, _commentId : Nat) : async Bool {
