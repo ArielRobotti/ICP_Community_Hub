@@ -1,5 +1,5 @@
 import Nat32 "mo:base/Nat32";
-import HashMap "mo:base/HashMap";
+import HashMap "libs/FunctionalStableHashMap";
 module {
 
     public type DaoFounder = {
@@ -54,7 +54,7 @@ module {
         id: Nat;
         autor : Principal;
         content : Text;
-        // date : Int;
+        date : Int;
     }
 
 }

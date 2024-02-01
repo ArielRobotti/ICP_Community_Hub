@@ -53,14 +53,18 @@ type PublishResult =
 type Publication = 
  record {
    autor: nat;
+   comments: vec Comment;
    content: Tutorial;
    date: int;
-   score: opt float64;
+   qualifyQty: nat;
+   qualifySum: nat;
  };
 type ICP_Community_Hub = 
  service {
    addAdmin: (text) -> (bool);
+   addCommentPost: (TutoId, Comment__1) -> (bool);
    aprovePublication: (nat) -> (Result);
+   deleteComment: (TutoId, Comment__1) -> (bool);
    deployDaoCanister: (text, text, vec DaoFounder, nat) -> (principal);
    getAprovedPublication: () -> (vec record {
                                        TutoId;
@@ -75,6 +79,7 @@ type ICP_Community_Hub =
    iamRegistered: () -> (bool);
    loadAvatar: (blob) -> (opt blob);
    publish: (Tutorial__1) -> (PublishResult);
+   qualifyPost: (TutoId, nat) -> (bool);
    rejectPublication: (nat) -> (Result);
    search: (text) -> (vec Publication) query;
    signUp: (text, opt text, opt blob) -> (SignUpResult);
@@ -84,5 +89,17 @@ type DaoFounder =
  record {
    name: text;
    "principal": principal;
+ };
+type Comment__1 = 
+ record {
+   autor: principal;
+   content: text;
+   id: nat;
+ };
+type Comment = 
+ record {
+   autor: principal;
+   content: text;
+   id: nat;
  };
 service : () -> ICP_Community_Hub

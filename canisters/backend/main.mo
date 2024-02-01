@@ -43,6 +43,7 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
   stable let incomingPublications = HashMap.init<TutoId, Publication>();
   stable let aprovedPublications = HashMap.init<TutoId, Publication>();
 
+  stable var counterGeneralId = 0;
   stable var DAO = Principal.fromText("aaaaa-aa");
 
   // -------------- Funcion para desplegar el canister de la DAO -----------
@@ -81,6 +82,11 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
   // -------------------------- Private Fuctions -------------------------------
   func daoIsDeployed() : Bool {
     Principal.fromText("aaaaa-aa") != DAO
+  };
+
+  func generateId() : Nat {
+    counterGeneralId += 1;
+    counterGeneralId - 1
   };
 
   func inBlackList(p : Principal) : Bool {
@@ -170,7 +176,8 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     switch (HashMap.get(userIds, Principal.equal, Principal.hash, caller)) {
       case null {
         let timestamp = Time.now() / 1_000_000_000 : Int; //Timestamp in seconds
-        HashMap.put(userIds, Principal.equal, Principal.hash, caller, currentUserId);
+        let userId = generateId();
+        HashMap.put(userIds, Principal.equal, Principal.hash, caller, userId);
 
         let newMember = {
           name;
@@ -181,8 +188,7 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
           votedPosts = []
         };
         // users.put(currentUserId,newMember);
-        HashMap.put(users, Nat.equal, Nat32.fromNat, currentUserId, newMember);
-        currentUserId += 1;
+        HashMap.put(users, Nat.equal, Nat32.fromNat, userId, newMember);
         return #ok(newMember)
       };
       case (?member) {
@@ -284,21 +290,25 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
           qualifySum = 0;
           comments = []
         };
-        // incomingPublications.put(currentTutorialId, pub);
-        HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, currentTutorialId, pub);
-
-        currentTutorialId += 1;
+        HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, generateId(), pub);
         #ok(pub)
       }
     }
   };
 
-  public shared ({ caller }) func addCommentPost(_id : TutoId, comment : Comment) : async Bool {
+  public shared ({ caller }) func addCommentPost(_id : TutoId, content : Text) : async Bool {
     assert (isUser(caller));
     switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
       case null { return false };
       case (?pub) {
+        let date = Time.now();
         let commentBuffer = Buffer.fromArray<Comment>(pub.comments);
+        let comment = {
+          id = generateId();
+          autor = caller;
+          content;
+          date
+        };
         commentBuffer.add(comment);
         let updatePub = {
           autor = pub.autor;
@@ -314,15 +324,54 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
     }
   };
 
-  public shared ({ caller }) func deleteComment(_id : TutoId, comment : Comment) : async Bool {
+  public shared ({ caller }) func editComment(_id : TutoId, _commentId : Nat, _updateContent : Text) : async Bool {
     assert (isUser(caller));
-    switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
+    let pub = HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id);
+    switch (pub) {
       case null { return false };
       case (?pub) {
         var index = 0;
-        for (p in pub.comments.vals()) {
-          if (p.id == _id) {
-            assert (p.autor == caller);
+        for (comment in pub.comments.vals()) {
+          if (comment.id == _commentId) {
+            assert (comment.autor == caller);
+            let commentsUpdate = Buffer.fromArray<Comment>(pub.comments);
+            let old = commentsUpdate.remove(index);
+            let updateComment = {
+              id = old.id;
+              autor = caller;
+              content = _updateContent;
+              date = old.date
+            };
+            commentsUpdate.add(updateComment);
+
+            let updatePub = {
+              autor = pub.autor;
+              date = pub.autor;
+              content = pub.content;
+              qualifyQty = pub.qualifyQty;
+              qualifySum = pub.qualifySum;
+              comments = Buffer.toArray<Comment>(commentsUpdate);
+            };
+            HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
+            return true
+          };
+          index += 1
+        };
+        return false
+      }
+    }
+  };
+
+  public shared ({ caller }) func deleteComment(_id : TutoId, _commentId : Nat) : async Bool {
+    assert (isUser(caller));
+    let pub = HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id);
+    switch (pub) {
+      case null { return false };
+      case (?pub) {
+        var index = 0;
+        for (comment in pub.comments.vals()) {
+          if (comment.id == _commentId) {
+            assert (comment.autor == caller);
             let commentsUpdate = Buffer.fromArray<Comment>(pub.comments);
             ignore commentsUpdate.remove(index);
             return true
@@ -331,6 +380,35 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
         };
         return false
       }
+    }
+  };
+
+  public shared ({ caller }) func qualifyPost(_id : TutoId, q : Nat) : async Bool {
+    assert (q >= 1 and q <= 5);
+    switch (getUser(caller)) {
+      case (?user) {
+        for (postId in user.votedPosts.vals()) {
+          if (postId == _id) {
+            return false
+          }
+        };
+        switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
+          case (?pub) {
+            let updatePub = {
+              autor = pub.autor;
+              date = pub.date;
+              content = pub.content;
+              qualifyQty = pub.qualifyQty + 1;
+              qualifySum = pub.qualifySum + q;
+              comments = pub.comments
+            };
+            HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
+            return true
+          };
+          case _ { return false }
+        }
+      };
+      case _ { return false }
     }
   };
 
@@ -380,35 +458,6 @@ shared ({ caller }) actor class ICP_Community_Hub() = {
       }
     };
     Buffer.toArray<Publication>(tempBuffer)
-  };
-
-  public shared ({ caller }) func qualifyPost(_id : TutoId, q : Nat) : async Bool {
-    assert (q >= 1 and q <= 5);
-    switch (getUser(caller)) {
-      case (?user) {
-        for (postId in user.votedPosts.vals()) {
-          if (postId == _id) {
-            return false
-          }
-        };
-        switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
-          case (?pub) {
-            let updatePub = {
-              autor = pub.autor;
-              date = pub.date;
-              content = pub.content;
-              qualifyQty = pub.qualifyQty + 1;
-              qualifySum = pub.qualifySum + q;
-              comments = pub.comments;
-            };
-            HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
-            return true;
-          };
-          case _ { return false }
-        }
-      };
-      case _ { return false }
-    }
   };
 
 }

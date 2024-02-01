@@ -1,21 +1,33 @@
 export const idlFactory = ({ IDL }) => {
+  const TutoId = IDL.Nat;
+  const Comment__1 = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'autor' : IDL.Principal,
+  });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const DaoFounder = IDL.Record({
     'principal' : IDL.Principal,
     'name' : IDL.Text,
   });
-  const TutoId = IDL.Nat;
   const Tutorial = IDL.Record({
     'title' : IDL.Text,
     'html' : IDL.Text,
     'assets' : IDL.Vec(IDL.Vec(IDL.Nat8)),
     'tags' : IDL.Vec(IDL.Text),
   });
+  const Comment = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'autor' : IDL.Principal,
+  });
   const Publication = IDL.Record({
     'content' : Tutorial,
     'autor' : IDL.Nat,
     'date' : IDL.Int,
-    'score' : IDL.Opt(IDL.Float64),
+    'qualifyQty' : IDL.Nat,
+    'qualifySum' : IDL.Nat,
+    'comments' : IDL.Vec(Comment),
   });
   const User = IDL.Record({
     'country' : IDL.Opt(IDL.Text),
@@ -46,7 +58,9 @@ export const idlFactory = ({ IDL }) => {
   });
   const ICP_Community_Hub = IDL.Service({
     'addAdmin' : IDL.Func([IDL.Text], [IDL.Bool], []),
+    'addCommentPost' : IDL.Func([TutoId, Comment__1], [IDL.Bool], []),
     'aprovePublication' : IDL.Func([IDL.Nat], [Result], []),
+    'deleteComment' : IDL.Func([TutoId, Comment__1], [IDL.Bool], []),
     'deployDaoCanister' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(DaoFounder), IDL.Nat],
         [IDL.Principal],
@@ -70,6 +84,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'publish' : IDL.Func([Tutorial__1], [PublishResult], []),
+    'qualifyPost' : IDL.Func([TutoId, IDL.Nat], [IDL.Bool], []),
     'rejectPublication' : IDL.Func([IDL.Nat], [Result], []),
     'search' : IDL.Func([IDL.Text], [IDL.Vec(Publication)], ['query']),
     'signUp' : IDL.Func(

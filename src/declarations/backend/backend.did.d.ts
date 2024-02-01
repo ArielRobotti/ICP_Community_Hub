@@ -2,10 +2,22 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
+export interface Comment {
+  'id' : bigint,
+  'content' : string,
+  'autor' : Principal,
+}
+export interface Comment__1 {
+  'id' : bigint,
+  'content' : string,
+  'autor' : Principal,
+}
 export interface DaoFounder { 'principal' : Principal, 'name' : string }
 export interface ICP_Community_Hub {
   'addAdmin' : ActorMethod<[string], boolean>,
+  'addCommentPost' : ActorMethod<[TutoId, Comment__1], boolean>,
   'aprovePublication' : ActorMethod<[bigint], Result>,
+  'deleteComment' : ActorMethod<[TutoId, Comment__1], boolean>,
   'deployDaoCanister' : ActorMethod<
     [string, string, Array<DaoFounder>, bigint],
     Principal
@@ -23,6 +35,7 @@ export interface ICP_Community_Hub {
     [] | [Uint8Array | number[]]
   >,
   'publish' : ActorMethod<[Tutorial__1], PublishResult>,
+  'qualifyPost' : ActorMethod<[TutoId, bigint], boolean>,
   'rejectPublication' : ActorMethod<[bigint], Result>,
   'search' : ActorMethod<[string], Array<Publication>>,
   'signUp' : ActorMethod<
@@ -35,7 +48,9 @@ export interface Publication {
   'content' : Tutorial,
   'autor' : bigint,
   'date' : bigint,
-  'score' : [] | [number],
+  'qualifyQty' : bigint,
+  'qualifySum' : bigint,
+  'comments' : Array<Comment>,
 }
 export type PublishResult = { 'ok' : Publication } |
   { 'err' : string };
