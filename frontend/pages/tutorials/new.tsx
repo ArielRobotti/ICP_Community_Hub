@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import Button from "../../components/common/Button"
 import { useCanister } from "@connect2ic/react"
+import TextAreaMD from "../../components/common/TextAreaMD"
 
 const New = () => {
   const [title, setTitle] = useState("")
@@ -26,7 +27,7 @@ const New = () => {
   }
 
   return (
-    <div className="p-6 max-w-lg min-h-[85vh]">
+    <div className="p-6 max-w-4xl min-h-[85vh] mx-auto">
       <h3 className="font-bold text-4xl my-5">Crea tu primer tutorial</h3>
       <form onSubmit={handleSubmit}>
         <div className="flex gap-3 flex-col">
@@ -49,16 +50,7 @@ const New = () => {
             <label htmlFor="html" className="font-semibold text-2xl">
               Cuerpo del tutorial
             </label>
-            <textarea
-              className="border border-gray-300 h-40 rounded-lg active:border-gray-950 p-4 dark:bg-neutral-900 dark:border-gray-900"
-              value={html}
-              onChange={(e) => {
-                if (e.target.value.length <= 1000) {
-                  setHtml(e.target.value)
-                }
-              }}
-            ></textarea>
-            <span>{html.length}/1000</span>
+            <TextAreaMD></TextAreaMD>
           </div>
           <div className="mb-3 flex flex-col">
             <label htmlFor="tags" className="font-semibold text-2xl">
