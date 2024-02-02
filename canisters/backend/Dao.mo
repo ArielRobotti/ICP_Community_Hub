@@ -23,7 +23,7 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
     let principalEqual = Principal.equal;
 
     stable let deployTimeStamp : Int = Time.now();
-    stable var masterPlatform = caller; //Principal de la plataforma principal
+    stable let masterPlatform = caller; //Principal de la plataforma principal
     stable let postsInTheVotingProcess = HashMap.init<TutoId, VotingStatus>();
     stable var votingPeriod = 259000; // Plazo de 3 dias para votar
 
@@ -102,20 +102,15 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
         }
     };
 
-    // ----------------- Intercation with masterCanister -----------------------------
+    // ----------------- Intercation with masterCanister and frontend canister-----------------------------
 
-    // public shared ({ caller }) func getIncomingPublication() : async [Publication] {
-    //     assert (_isAMember(caller));
-    //     let masterActor = actor (Principal.toText(masterPlatform)) : actor {
-    //         getIncomingPublication : shared () -> async [Publication]
-    //     };
-    //     await masterActor.getIncomingPublication()
-    // };
 
     public shared ({ caller }) func votePublication(_id : TutoId, _date : Int, _vote : Bool) : async Bool {
-        //Vulnerabilidad critica. TODO Evitar que se puedan hacer llamadas con datos falsos
-        //Desde el front se envia el Id de la publicacioón, su campo date y el voto del miembro de la DAO
-        switch (HashMap.get(members, principalEqual, principalHash, caller)) {
+        //This function will be executed from the front of the platform through a direct reference to this canister
+        //Warning: Critical vulnerability. TODO: Prevent calls from being made with false information
+        //From the front the Id of the publication, its date field and the vote of the DAO member are sent
+        let member = HashMap.get(members, principalEqual, principalHash, caller);
+        switch (member) {
             case null { return false };
             case (?member) {
                 let currentDate = Time.now() / 1_000_000_000 : Int;
@@ -127,7 +122,7 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
                 let status = switch (HashMap.get(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id)) {
                     case null {
                         {
-                            startRound = _date; //Timestamp de la publicación
+                            startRound = _date;
                             votes = 1;
                             balance = if (_vote) { 1 } else { -1 };
                             end = false;
@@ -139,7 +134,7 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
                         };
                         let vote = if (_vote) { 1 : Int } else { -1 : Int };
                         {
-                            startRound = _date; //Timestamp de la publicación
+                            startRound = _date;
                             votes = oldStatus.votes + 1;
                             balance = oldStatus.balance + vote;
                             end = false;
