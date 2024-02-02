@@ -14,10 +14,9 @@ import Principal "mo:base/Principal";
 // Imports for custom structures
 import HashMap "libs/FunctionalStableHashMap";
 import Dao "Dao"; //Actor class for deploying the DAO from this canister
-import Types "Types";
-import { tutoIdHash; tutoIdEqual } = "Types";
-import User "user";
-import Account "account";
+import Types "./types/Types";
+import { tutoIdHash; tutoIdEqual } = "./types/Types";
+import User "./types/user";
 
 shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
@@ -45,7 +44,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   stable var counterGeneralId = 0;
   stable var DAO = Principal.fromText("aaaaa-aa");
 
-  // -------------- Function to deploy the DAO canister -----------
+  // -------------- Function to deploy the DAO canister  bw4dl-smaaa-aaaaa-qaacq-cai -----------
 
   public shared ({ caller }) func deployDaoCanister(_name : Text, _manifesto : Text, founders : [DaoFounder], extraFees : Nat) : async Principal {
     //Considering that this function will be executed only once, it is suggested to execute it directly from the CLI to

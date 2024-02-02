@@ -6,22 +6,19 @@ export interface Comment {
   'id' : bigint,
   'content' : string,
   'autor' : Principal,
-}
-export interface Comment__1 {
-  'id' : bigint,
-  'content' : string,
-  'autor' : Principal,
+  'date' : bigint,
 }
 export interface DaoFounder { 'principal' : Principal, 'name' : string }
 export interface ICP_Community_Hub {
   'addAdmin' : ActorMethod<[string], boolean>,
-  'addCommentPost' : ActorMethod<[TutoId, Comment__1], boolean>,
+  'addComment' : ActorMethod<[TutoId, string], boolean>,
   'aprovePublication' : ActorMethod<[bigint], Result>,
-  'deleteComment' : ActorMethod<[TutoId, Comment__1], boolean>,
+  'deleteComment' : ActorMethod<[TutoId, bigint], boolean>,
   'deployDaoCanister' : ActorMethod<
     [string, string, Array<DaoFounder>, bigint],
     Principal
   >,
+  'editComment' : ActorMethod<[TutoId, bigint, string], boolean>,
   'getAprovedPublication' : ActorMethod<[], Array<[TutoId, Publication]>>,
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
@@ -34,7 +31,6 @@ export interface ICP_Community_Hub {
     [Uint8Array | number[]],
     [] | [Uint8Array | number[]]
   >,
-  'publish' : ActorMethod<[Tutorial__1], PublishResult>,
   'qualifyPost' : ActorMethod<[TutoId, bigint], boolean>,
   'rejectPublication' : ActorMethod<[bigint], Result>,
   'search' : ActorMethod<[string], Array<Publication>>,
@@ -42,10 +38,11 @@ export interface ICP_Community_Hub {
     [string, [] | [string], [] | [Uint8Array | number[]]],
     SignUpResult
   >,
+  'uploadTutorial' : ActorMethod<[Tutorial], PublishResult>,
   'userConfig' : ActorMethod<[UserSettings], undefined>,
 }
 export interface Publication {
-  'content' : Tutorial,
+  'content' : Tutorial__1,
   'autor' : bigint,
   'date' : bigint,
   'qualifyQty' : bigint,
