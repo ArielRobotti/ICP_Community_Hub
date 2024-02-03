@@ -72,7 +72,7 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
 
     };
 
-    public shared func eneableMember(p : Principal) : async Bool {
+    public shared ({ caller }) func eneableMember(p : Principal) : async Bool {
         assert (caller == masterPlatform);
         return setMemberEnablement(p, true)
     };
@@ -103,7 +103,6 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
     };
 
     // ----------------- Intercation with masterCanister and frontend canister-----------------------------
-
 
     public shared ({ caller }) func votePublication(_id : TutoId, _date : Int, _vote : Bool) : async Bool {
         //This function will be executed from the front of the platform through a direct reference to this canister
@@ -176,5 +175,12 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
             };
         };
     };
+
+    // public func publicateApproved(): (){
+    //     let now = Time.now() / 1_000_000_000;
+    //     for(p in HashMap.keys(postsInTheVotingProcess)){
+    //         await tryPublicate(p, now);
+    //     };
+    // };
 
 }
