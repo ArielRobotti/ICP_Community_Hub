@@ -14,6 +14,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { Home } from "./pages/home"
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
+import { New } from "./pages/tutorials/new"
 import * as backend from "../.dfx/local/canisters/backend"
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Navbar></Navbar>
         <Routes>
           <Route path="/" Component={Home}></Route>
+          <Route path="/tutorials/new" Component={New}></Route>
         </Routes>
         <Footer></Footer>
       </div>
