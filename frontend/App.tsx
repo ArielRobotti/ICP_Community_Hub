@@ -3,8 +3,8 @@ import React from "react"
  * Connect2ic provides essential utilities for IC app development
  */
 import { createClient } from "@connect2ic/core"
-import { defaultProviders } from "@connect2ic/core/providers"
-import { ConnectButton, ConnectDialog, Connect2ICProvider } from "@connect2ic/react"
+import { InternetIdentity } from "@connect2ic/core/providers"
+import { Connect2ICProvider } from "@connect2ic/react"
 import "@connect2ic/core/style.css"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
@@ -37,7 +37,13 @@ function App() {
 
 const client = createClient({
   canisters: {},
-  providers: defaultProviders,
+  providers: [
+    new InternetIdentity({
+      dev: true,
+      // The url for the providers frontend
+      providerUrl: "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai",
+    })
+  ],
   globalProviderConfig: {
     dev: import.meta.env.DEV,
   },
