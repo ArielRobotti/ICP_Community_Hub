@@ -2,9 +2,23 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
-export interface ICPTutorials {
+export interface Comment {
+  'id' : bigint,
+  'content' : string,
+  'autor' : Principal,
+  'date' : bigint,
+}
+export interface DaoFounder { 'principal' : Principal, 'name' : string }
+export interface ICP_Community_Hub {
   'addAdmin' : ActorMethod<[string], boolean>,
+  'addComment' : ActorMethod<[TutoId, string], boolean>,
   'aprovePublication' : ActorMethod<[bigint], Result>,
+  'deleteComment' : ActorMethod<[TutoId, bigint], boolean>,
+  'deployDaoCanister' : ActorMethod<
+    [string, string, Array<DaoFounder>, bigint],
+    Principal
+  >,
+  'editComment' : ActorMethod<[TutoId, bigint, string], boolean>,
   'getAprovedPublication' : ActorMethod<[], Array<[TutoId, Publication]>>,
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
@@ -12,25 +26,28 @@ export interface ICPTutorials {
   'getPubByID' : ActorMethod<[bigint], [] | [Publication]>,
   'getPubFromUser' : ActorMethod<[bigint], Array<Publication>>,
   'getUsers' : ActorMethod<[], Array<User>>,
-  'isRegistered' : ActorMethod<[], boolean>,
+  'iamRegistered' : ActorMethod<[], boolean>,
   'loadAvatar' : ActorMethod<
     [Uint8Array | number[]],
     [] | [Uint8Array | number[]]
   >,
-  'publish' : ActorMethod<[Tutorial__1], PublishResult>,
+  'qualifyPost' : ActorMethod<[TutoId, bigint], boolean>,
   'rejectPublication' : ActorMethod<[bigint], Result>,
   'search' : ActorMethod<[string], Array<Publication>>,
   'signUp' : ActorMethod<
     [string, [] | [string], [] | [Uint8Array | number[]]],
     SignUpResult
   >,
+  'uploadTutorial' : ActorMethod<[Tutorial], PublishResult>,
   'userConfig' : ActorMethod<[UserSettings], undefined>,
 }
 export interface Publication {
-  'content' : Tutorial,
+  'content' : Tutorial__1,
   'autor' : bigint,
   'date' : bigint,
-  'score' : [] | [number],
+  'qualifyQty' : bigint,
+  'qualifySum' : bigint,
+  'comments' : Array<Comment>,
 }
 export type PublishResult = { 'ok' : Publication } |
   { 'err' : string };
@@ -68,5 +85,5 @@ export interface UserSettings {
   'email' : [] | [string],
   'avatar' : [] | [Uint8Array | number[]],
 }
-export interface _SERVICE extends ICPTutorials {}
+export interface _SERVICE extends ICP_Community_Hub {}
 export declare const idlFactory: IDL.InterfaceFactory;
