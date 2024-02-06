@@ -4,8 +4,7 @@ import React from "react"
  */
 import { createClient } from "@connect2ic/core"
 import { InternetIdentity } from "@connect2ic/core/providers"
-import { defaultProviders } from "@connect2ic/core/providers"
-import { ConnectButton, ConnectDialog, Connect2ICProvider } from "@connect2ic/react"
+import { Connect2ICProvider } from "@connect2ic/react"
 import "@connect2ic/core/style.css"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
