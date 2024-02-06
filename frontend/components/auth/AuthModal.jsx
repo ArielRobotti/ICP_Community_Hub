@@ -6,12 +6,24 @@ import { useCanister } from "@connect2ic/react"
 const AuthModal = () => {
   const [backend] = useCanister("backend")
 
-  const [email, setEmail] = useState("")
-  const [firstName, setFirstName] = useState("")
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(true)
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const signup = async (email, firstName) => {
-    console.log(`Registering user with email ${email} and name ${firstName}`)
+    setLoading(true);
+    const res = await backend.signUp(firstName, [email], []);
+    if(res) {
+      console.log("USER REGISTERED");
+      console.log(res);
+      setIsAuthModalOpen(false);
+    }
+    else {
+      setError('Could not register. Try again.')
+    }
+    setLoading(false);
   }
 
   const checkUser = async () => {
@@ -28,9 +40,7 @@ const AuthModal = () => {
     if (!data) {
       setIsAuthModalOpen(true);
     }
-    else {
-      setUserFound(true)
-    }
+    setIsAuthModalOpen(false);
   }
 
   const handleSignup = async (e) => {
@@ -85,8 +95,9 @@ const AuthModal = () => {
                               className="bg-indigo-500 py-3 mt-5 w-full text-white font-medium rounded-md hover:bg-indigo-600"
                               type="submit"
                             >
-                              Register
+                              { loading ? "..." : "Register"}
                             </button>
+                            { error != '' && <span className="text-danger">{error}</span>}
                           </form>
                         </div>
                     </div>
