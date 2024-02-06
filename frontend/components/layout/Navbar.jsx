@@ -1,5 +1,6 @@
 import React from "react"
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react"
+import AuthModal from "../auth/AuthModal"
 
 const Navbar = () => {
 
@@ -12,8 +13,12 @@ const Navbar = () => {
                 <li><a href="#">Home</a></li>
                 <li><a href="#">DAO</a></li>
             </ul>
-            { isConnected ? <p>Welcome {principal}</p> : <ConnectButton /> }
+            { isConnected && <p>Welcome {principal}</p> }
+            <ConnectButton />
             </div>
+            { isConnected && (
+                <AuthModal></AuthModal>
+            )}
             <ConnectDialog />
         </div>
     )
