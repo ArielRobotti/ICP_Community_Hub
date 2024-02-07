@@ -10,11 +10,12 @@ import "@connect2ic/core/style.css"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
 
-import { Home } from "./pages/home"
+import * as backend from "../.dfx/local/canisters/backend"
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
+import { Home } from "./pages/home"
 import { New } from "./pages/tutorials/new"
-import * as backend from "../.dfx/local/canisters/backend"
+import Incoming from "./pages/tutorials/incoming"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Navbar></Navbar>
         <Routes>
           <Route path="/" Component={Home}></Route>
+          <Route path="/tutorials/incoming" Component={Incoming}></Route>
           <Route path="/tutorials/new" Component={New}></Route>
         </Routes>
         <Footer></Footer>

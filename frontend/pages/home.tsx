@@ -1,6 +1,15 @@
 import React from "react"
+import { useNavigate } from "react-router-dom";
+import { useConnect } from "@connect2ic/react"
 
 const Home = () => {
+
+  const navigate = useNavigate();
+  const { isConnected } = useConnect();
+
+  if (isConnected){ 
+    navigate("tutorials/incoming")
+  }
 
   return (
     <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
