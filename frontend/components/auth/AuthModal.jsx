@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from "react"
 import { IoMdClose } from "react-icons/io"
 import FormInput from "../common/FormInput"
-import { useCanister } from "@connect2ic/react"
+import { useCanister, useConnect } from "@connect2ic/react"
+import { useAppStore } from "/frontend/store/store"
 
 const AuthModal = () => {
-  const [backend] = useCanister("backend")
+  const [backend] = useCanister("backend");
+  const { principal } = useConnect();
 
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { setUserInfo } = useAppStore();
 
   const signup = async (email, firstName) => {
     setLoading(true);
     const res = await backend.signUp(firstName, [email], []);
     if(res) {
-      console.log("USER REGISTERED");
+      console.log("res is")
       console.log(res);
+      setUserInfo(res)
       setIsAuthModalOpen(false);
     }
     else {
@@ -28,15 +32,15 @@ const AuthModal = () => {
 
   const checkUser = async () => {
     const res = await backend.getMiUser()
-    console.log("RES IS: ", res)
     if (res?.length > 0){
-        return true;
+      setUserInfo(res[0]);
+      return true;
     }
     return false;
   }
 
   const fetchUser = async () => {
-    const data = await checkUser(email)
+    const data = await checkUser();
     if (!data) {
       setIsAuthModalOpen(true);
     }
@@ -51,8 +55,10 @@ const AuthModal = () => {
   }
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (principal){
+      fetchUser();
+    }
+  }, [principal]);
 
   return (
     <>
