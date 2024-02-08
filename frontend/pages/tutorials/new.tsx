@@ -7,7 +7,7 @@ const New = () => {
   const [title, setTitle] = useState("")
   const [tags, setTags] = useState("")
   const [html, setHtml] = useState("")
-  // const [backend] = useCanister("backend");
+  const [backend] = useCanister("backend");
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -18,10 +18,7 @@ const New = () => {
         tags: tags !== "" ? tags : [],
         assets: [],
       }
-      // const res = await backend.publish(content);
-      const res = new Promise((resolve) => {
-        resolve('OK')
-      });
+      const res = await backend.uploadTutorial(content);
       console.log("Tutorial Created?: ", res)
     }
   }
@@ -50,7 +47,7 @@ const New = () => {
             <label htmlFor="html" className="font-semibold text-2xl">
               Cuerpo del tutorial
             </label>
-            <TextAreaMD></TextAreaMD>
+            <TextAreaMD setText={setHtml}></TextAreaMD>
           </div>
           <div className="mb-3 flex flex-col">
             <label htmlFor="tags" className="font-semibold text-2xl">

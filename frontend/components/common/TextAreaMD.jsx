@@ -1,10 +1,17 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useStackEdit } from "use-stackedit"
 import Button from "../../components/common/Button"
 
-const TextAreaMD = () => {
-  const [value, setValue] = useState("")
-  const { openStackedit, onFileChange } = useStackEdit(setValue)
+const TextAreaMD = ({setText}) => {
+  const [value, setValue] = useState("");
+  const { openStackedit, onFileChange } = useStackEdit(setValue);
+
+  useEffect(() => {
+    if (value) {
+      setText(value);
+    };
+  }, [value]);
+
   return (
     <div>
       <textarea
