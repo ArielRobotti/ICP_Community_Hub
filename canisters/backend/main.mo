@@ -172,9 +172,9 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
 
-    if (Principal.isAnonymous(caller)) { 
-      return #err(#CallerAnnonymous);
-    };
+    // if (Principal.isAnonymous(caller)) { 
+    //   return #err(#CallerAnnonymous);
+    // };
     if (inBlackList(caller)) { 
       return #err(#InBlackList);
     };
@@ -211,12 +211,12 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   };
 
   public shared ({ caller }) func getMiId() : async ?Nat {
-    assert not Principal.isAnonymous(caller);
+    // assert not Principal.isAnonymous(caller);
     HashMap.get(userIds, Principal.equal, Principal.hash, caller)
   };
 
   public shared ({ caller }) func getMiUser() : async ?User {
-    assert not Principal.isAnonymous(caller);
+    // assert not Principal.isAnonymous(caller);
     switch (HashMap.get(userIds, Principal.equal, Principal.hash, caller)) {
       case null { return null };
       case (?userId) {
