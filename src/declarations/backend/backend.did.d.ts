@@ -73,10 +73,10 @@ export interface Tutorial__1 {
 }
 export interface User {
   'country' : [] | [string],
+  'qualifiedPosts' : Array<bigint>,
   'admissionDate' : bigint,
   'name' : string,
   'email' : [] | [string],
-  'votedPosts' : Array<bigint>,
   'avatar' : [] | [Uint8Array | number[]],
 }
 export interface UserSettings {

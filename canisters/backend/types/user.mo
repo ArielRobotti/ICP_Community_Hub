@@ -14,7 +14,7 @@ module{
         admissionDate: Int; //Timestamp in secconds
         country: ?Text;
         //account: Account;
-        votedPosts: [Nat];
+        qualifiedPosts: [Nat];
     };
 
     public type SignUpErrors = {

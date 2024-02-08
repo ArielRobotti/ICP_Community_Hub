@@ -27,10 +27,10 @@ export const idlFactory = ({ IDL }) => {
   });
   const User = IDL.Record({
     'country' : IDL.Opt(IDL.Text),
+    'qualifiedPosts' : IDL.Vec(IDL.Nat),
     'admissionDate' : IDL.Int,
     'name' : IDL.Text,
     'email' : IDL.Opt(IDL.Text),
-    'votedPosts' : IDL.Vec(IDL.Nat),
     'avatar' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
   const SignUpErrors = IDL.Variant({

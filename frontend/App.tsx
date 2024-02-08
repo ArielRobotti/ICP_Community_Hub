@@ -1,10 +1,12 @@
-import React from "react"
+import React, { useEffect } from "react"
 /*
  * Connect2ic provides essential utilities for IC app development
  */
 import { createClient } from "@connect2ic/core"
 import { InternetIdentity } from "@connect2ic/core/providers"
 import { defaultProviders } from "@connect2ic/core/providers"
+import { useCanister, useConnect } from "@connect2ic/react"
+
 import { ConnectButton, ConnectDialog, Connect2ICProvider } from "@connect2ic/react"
 import "@connect2ic/core/style.css"
 
@@ -16,8 +18,23 @@ import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
 import { New } from "./pages/tutorials/new"
 import * as backend from "../.dfx/local/canisters/backend"
+import * as dao from "../.dfx/local/canisters/backend";
+
 
 function App() {
+  const [backend] = useCanister("backend");
+  const checkUser = async () => {
+    const res = await backend.getMiUser()
+    console.log(res);
+  };
+  const { isConnected, principal } = useConnect();
+  
+  useEffect(() => {
+    if (isConnected){
+      console.log(principal)
+      checkUser();
+    }
+  }, [isConnected]);
   return (
     <Router>
       <div className="App dark:bg-slate-800 dark:text-white">
@@ -32,9 +49,11 @@ function App() {
   )
 }
 
+
 const client = createClient({
   canisters: {
     backend,
+    dao,
   },
   providers: [
     new InternetIdentity({

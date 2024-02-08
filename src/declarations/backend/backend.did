@@ -12,7 +12,7 @@ type User =
    country: opt text;
    email: opt text;
    name: text;
-   votedPosts: vec nat;
+   qualifiedPosts: vec nat;
  };
 type Tutorial__1 = 
  record {

@@ -191,7 +191,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           country = null;
           admissionDate = timestamp;
           avatar = _avatar;
-          votedPosts = [];
+          qualifiedPosts = [];
         };
         // users.put(currentUserId,newMember);
         HashMap.put(users, Nat.equal, Nat32.fromNat, userId, newMember);
@@ -251,7 +251,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
             case null { user.email };
             case (email) { email };
           };
-          votedPosts = user.votedPosts;
+          qualifiedPosts = user.qualifiedPosts;
           admissionDate = user.admissionDate;
         };
         HashMap.put<UserId, User>(users, Nat.equal, Nat32.fromNat, userId, updateUser)
@@ -267,14 +267,15 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           case null { return null };
           case (?user) {
             // It is suggested to compress the image in the front before sending it to this function
-            var userUpdate = {
-              email = user.email;
-              name = user.name;
-              country = user.country;
-              admissionDate = user.admissionDate;
-              avatar = ?avatar;
-              votedPosts = user.votedPosts;
-            };
+            // var userUpdate = {
+            //   email = user.email;
+            //   name = user.name;
+            //   country = user.country;
+            //   admissionDate = user.admissionDate;
+            //   avatar = ?avatar;
+            //   qualifiedPosts = user.qualifiedPosts;
+            // };
+            var userUpdate = {user with avatar = ?avatar };
             HashMap.put(users, Nat.equal, Nat32.fromNat, userId, userUpdate);
             return userUpdate.avatar;
           }
@@ -316,21 +317,22 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           date
         };
         commentBuffer.add(comment);
-        let updatePub = {
-          autor = pub.autor;
-          date = pub.date;
-          content = pub.content;
-          qualifyQty = pub.qualifyQty;
-          qualifySum = pub.qualifySum;
-          comments = Buffer.toArray(commentBuffer)
-        };
+        // let updatePub = {
+        //   autor = pub.autor;
+        //   date = pub.date;
+        //   content = pub.content;
+        //   qualifyQty = pub.qualifyQty;
+        //   qualifySum = pub.qualifySum;
+        //   comments = Buffer.toArray(commentBuffer)
+        // };
+        let updatePub = {pub with comments = Buffer.toArray(commentBuffer)};
         HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
         return true
       }
     }
   };
 
-  public shared ({ caller }) func editComment(_id : TutoId, _commentId : Nat, _updateContent : Text) : async Bool {
+  public shared ({ caller }) func editComment(_id : TutoId, _commentId : Nat, content : Text) : async Bool {
     assert (isUser(caller));
     let pub = HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id);
     switch (pub) {
@@ -342,21 +344,23 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
             assert (comment.autor == caller);
             let commentsUpdate = Buffer.fromArray<Comment>(pub.comments);
             let old = commentsUpdate.remove(index);
-            let updateComment = {
-              id = old.id;
-              autor = caller;
-              content = _updateContent;
-              date = old.date
-            };
+            // let updateComment = {
+            //   id = old.id;
+            //   autor = caller;
+            //   content = _updateContent;
+            //   date = old.date
+            // };
+            let updateComment = {old with content };
             commentsUpdate.add(updateComment);
-            let updatePub = {
-              autor = pub.autor;
-              date = pub.autor;
-              content = pub.content;
-              qualifyQty = pub.qualifyQty;
-              qualifySum = pub.qualifySum;
-              comments = Buffer.toArray<Comment>(commentsUpdate)
-            };
+            // let updatePub = {
+            //   autor = pub.autor;
+            //   date = pub.autor;
+            //   content = pub.content;
+            //   qualifyQty = pub.qualifyQty;
+            //   qualifySum = pub.qualifySum;
+            //   comments = Buffer.toArray<Comment>(commentsUpdate)
+            // };
+            let updatePub = {pub with comments = Buffer.toArray<Comment>(commentsUpdate)};
             HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
             return true
           };
@@ -392,22 +396,39 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     assert (q >= 1 and q <= 5);
     switch (getUser(caller)) {
       case (?user) {
-        for (postId in user.votedPosts.vals()) {
+        for (postId in user.qualifiedPosts.vals()) {
           if (postId == _id) {
             return false
           }
         };
         switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
           case (?pub) {
-            let updatePub = {
-              autor = pub.autor;
-              date = pub.date;
-              content = pub.content;
+            // let updatePub = {
+            //   autor = pub.autor;
+            //   date = pub.date;
+            //   content = pub.content;
+            //   qualifyQty = pub.qualifyQty + 1;
+            //   qualifySum = pub.qualifySum + q;
+            //   comments = pub.comments
+            // };
+            let updatePub = {pub with 
               qualifyQty = pub.qualifyQty + 1;
               qualifySum = pub.qualifySum + q;
-              comments = pub.comments
             };
             HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
+
+            let updateQualifiedPosts = Buffer.fromArray<TutoId>(user.qualifiedPosts);
+            updateQualifiedPosts.add(_id);
+            // let userUpdate = {
+            //   email = user.email;
+            //   name = user.name;
+            //   country = user.country;
+            //   admissionDate = user.admissionDate;
+            //   avatar = user.avatar;
+            //   qualifiedPosts = Buffer.toArray(updateQualifiedPosts);
+            // };
+            let userUpdate = {user with qualifiedPosts = Buffer.toArray(updateQualifiedPosts)};
+            HashMap.put(users, Nat.equal, Nat32.fromNat, _id, userUpdate );
             return true
           };
           case _ { return false }

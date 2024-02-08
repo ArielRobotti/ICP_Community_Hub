@@ -115,7 +115,10 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
                 let currentDate = Time.now() / 1_000_000_000 : Int;
 
                 for (id in member.votedTutoId.vals()) {
-                    if (id == _id) { return false }
+                    if (id == _id) { 
+                        await tryPublicate(_id, currentDate);
+                        return false 
+                    }
                 };
 
                 let status = switch (HashMap.get(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id)) {
@@ -129,6 +132,7 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
                     };
                     case (?oldStatus) {
                         if (_date != oldStatus.startRound) {
+                            await tryPublicate(_id, currentDate);
                             return false
                         };
                         let vote = if (_vote) { 1 : Int } else { -1 : Int };

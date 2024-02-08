@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conectar a MetaMask</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
+</head>
+<body>
+
+<h1>Conectar a MetaMask</h1>
+
+<button id="connectButton">Conectar a MetaMask</button>
+
+<div id="result"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        // Verificar si MetaMask está instalado
+        if (typeof window.ethereum !== 'undefined') {
+            const web3 = new Web3(window.ethereum);
+
+            try {
+                // Solicitar permisos de conexión a MetaMask
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                // Mostrar la dirección del usuario conectado
+                const accounts = await web3.eth.getAccounts();
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = 'Conectado con éxito. Dirección: ' + accounts[0];
+            } catch (error) {
+                console.error('Error al conectar a MetaMask:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = 'Error al conectar a MetaMask: ' + error.message;
+            }
+        } else {
+            // MetaMask no está instalado
+            console.error('MetaMask no está instalado.');
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'MetaMask no está instalado.';
+        }
+
+        // Configurar el evento click para el botón
+        const connectButton = document.getElementById('connectButton');
+        connectButton.addEventListener('click', async function () {
+            // Conectar a MetaMask al hacer clic en el botón
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const accounts = await web3.eth.getAccounts();
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = 'Conectado con éxito. Dirección: ' + accounts[0];
+            } catch (error) {
+                console.error('Error al conectar a MetaMask:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = 'Error al conectar a MetaMask: ' + error.message;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
