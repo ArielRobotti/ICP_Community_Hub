@@ -170,6 +170,8 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   //----------------- Public shared functions ---------------------------------------
 
+  public shared query ({caller}) func whoAmi():async Text{"Soy " # Principal.toText(caller)};
+
   public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
 
     if (Principal.isAnonymous(caller)) { 

@@ -1,5 +1,6 @@
 import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
 
 export interface Comment {
   'id' : bigint,
@@ -39,6 +40,7 @@ export interface ICP_Community_Hub {
   >,
   'uploadTutorial' : ActorMethod<[Tutorial], PublishResult>,
   'userConfig' : ActorMethod<[UserSettings], undefined>,
+  'whoAmi' : ActorMethod<[], string>,
 }
 export interface Publication {
   'content' : Tutorial__1,
@@ -85,3 +87,4 @@ export interface UserSettings {
   'avatar' : [] | [Uint8Array | number[]],
 }
 export interface _SERVICE extends ICP_Community_Hub {}
+export declare const idlFactory: IDL.InterfaceFactory;

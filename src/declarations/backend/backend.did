@@ -85,6 +85,7 @@ type ICP_Community_Hub =
    signUp: (text, opt text, opt blob) -> (SignUpResult);
    uploadTutorial: (Tutorial) -> (PublishResult);
    userConfig: (UserSettings) -> ();
+   whoAmi: () -> (text) query;
  };
 type DaoFounder = 
  record {

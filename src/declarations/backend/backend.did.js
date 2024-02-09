@@ -90,6 +90,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'uploadTutorial' : IDL.Func([Tutorial], [PublishResult], []),
     'userConfig' : IDL.Func([UserSettings], [], []),
+    'whoAmi' : IDL.Func([], [IDL.Text], ['query']),
   });
   return ICP_Community_Hub;
 };
