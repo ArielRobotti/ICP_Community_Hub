@@ -16,6 +16,29 @@ module {
         //account: Account;
     };
 
+    public type UserSettings = {
+        name : ?Text;
+        email : ?Text;
+        avatar : ?Blob;
+        country : ?Text
+    };
+    public type User = {
+        name : Text;
+        email : ?Text;
+        avatar : ?Blob;
+        admissionDate : Int; //Timestamp in secconds
+        country : ?Text;
+        //account: Account;
+        votedPosts : [Nat];
+        postPublicated : [TutoId]
+    };
+
+    public type SignUpErrors = {
+        #CallerAnnonymous;
+        #IsAlreadyAMember;
+        #InBlackList
+    };
+
     public type VotingStatus = {
         startRound: Int; //Timestamp de la publicación
         votes: Nat;

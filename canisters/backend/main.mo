@@ -16,19 +16,19 @@ import HashMap "libs/FunctionalStableHashMap";
 import Dao "Dao"; //Actor class for deploying the DAO from this canister
 import Types "./types/Types";
 import { tutoIdHash; tutoIdEqual } = "./types/Types";
-import User "./types/user";
+// import User "./types/user";
 
 shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   public type Tutorial = Types.Tutorial;
   public type Publication = Types.Publication;
   public type Comment = Types.Comment;
-  public type User = User.User;
-  public type SignUpResult = Result.Result<User, User.SignUpErrors>;
+  public type User = Types.User;
+  public type SignUpResult = Result.Result<User, Types.SignUpErrors>;
   public type PublishResult = Result.Result<Publication, Text>;
   public type TutoId = Nat;
   public type UserId = Nat;
-  public type UserSettings = User.UserSettings;
+  public type UserSettings = Types.UserSettings;
   public type DaoFounder = Types.DaoFounder;
 
   // stable var currentUserId = 0;
@@ -75,7 +75,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     Internal.cyclesAdd(13_846_199_230 + extraFees); // FEE to create a canister 13 846 199 230
     let daoCanister = await Dao.Dao(_name, _manifesto, founders); // Creation of canister for the DAO
     DAO := Principal.fromActor(daoCanister);
-    return DAO;
+    return DAO
   };
 
   // -------------------------- Private Fuctions -------------------------------
@@ -120,9 +120,9 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     ///If the DAO is deployed and _caller is not the DAO it throws an assertion error
     ///If the DAO is NOT deployed and _caller is not an admin it throws an error
     if (daoIsDeployed()) {
-      assert _caller == DAO 
+      assert _caller == DAO
     } else {
-      (assert isAdmin(_caller)); 
+      (assert isAdmin(_caller))
     }
   };
 
@@ -135,6 +135,15 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     switch (pub) {
       case null { return #err("Tutorial id does not exist") };
       case (?tuto) {
+        let autor = HashMap.get(users, Nat.equal, Nat32.fromNat, tuto.autor);
+        switch autor {
+          case null { return #err("Error inesperado :P") };
+          case (?autor) {
+            let updatPublications = Buffer.fromArray<Nat>(autor.postPublicated);
+            updatPublications.add(id);
+            let updateAutor = { autor with postPublicated = updatPublications }
+          };
+        };
         HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, id, tuto);
         return #ok()
       }
@@ -165,51 +174,54 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     tempBuffer.add(Principal.fromText(p));
 
     admins := Buffer.toArray<Principal>(tempBuffer);
-    true;
+    true
   };
 
   //----------------- Public shared functions ---------------------------------------
 
-  public shared query ({caller}) func whoAmi():async Text{"Soy " # Principal.toText(caller)};
+  public shared query ({ caller }) func whoAmi() : async Text {
+    "Soy " # Principal.toText(caller)
+  };
 
-  public shared ({ caller }) func signUp(name : Text, _email : ?Text, _avatar : ?Blob) : async SignUpResult {
+  public shared ({ caller }) func signUp(name : Text, email : ?Text, avatar : ?Blob) : async SignUpResult {
 
-    if (Principal.isAnonymous(caller)) { 
-      return #err(#CallerAnnonymous);
+    if (Principal.isAnonymous(caller)) {
+      return #err(#CallerAnnonymous)
     };
-    if (inBlackList(caller)) { 
-      return #err(#InBlackList);
+    if (inBlackList(caller)) {
+      return #err(#InBlackList)
     };
-    let member = HashMap.get(userIds, Principal.equal, Principal.hash, caller);
-    switch (member) {
+    let user = HashMap.get(userIds, Principal.equal, Principal.hash, caller);
+    switch (user) {
       case null {
         let timestamp = Time.now() / 1_000_000_000 : Int; //Timestamp in seconds
         let userId = generateId();
         HashMap.put(userIds, Principal.equal, Principal.hash, caller, userId);
 
-        let newMember = {
+        let newUser : User = {
           name;
-          email = _email;
+          email;
           country = null;
           admissionDate = timestamp;
-          avatar = _avatar;
-          votedPosts = [];
+          avatar;
+          votedPosts : [Nat] = [];
+          postPublicated : [TutoId] = []
         };
         // users.put(currentUserId,newMember);
-        HashMap.put(users, Nat.equal, Nat32.fromNat, userId, newMember);
-        return #ok(newMember);
+        HashMap.put(users, Nat.equal, Nat32.fromNat, userId, newUser);
+        return #ok(newUser)
       };
       case (?member) {
         return #err(#IsAlreadyAMember)
-      };
-    };
+      }
+    }
   };
 
   public shared ({ caller }) func iamRegistered() : async Bool {
     return switch (HashMap.get(userIds, Principal.equal, Principal.hash, caller)) {
       case null { false };
-      case _ { true };
-    };
+      case _ { true }
+    }
   };
 
   public shared ({ caller }) func getMiId() : async ?Nat {
@@ -234,27 +246,26 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
         var userId = 0;
         switch (HashMap.get(userIds, Principal.equal, Principal.hash, caller)) {
           case null { return };
-          case (?id) { userId := id };
+          case (?id) { userId := id }
         };
         let updateUser = {
+          user with
           name = switch (settings.name) {
             case null { user.name };
-            case (?newName) { newName };
+            case (?newName) { newName }
           };
           avatar = switch (settings.avatar) {
             case null { user.avatar };
-            case (newAvatar) { newAvatar };
+            case (newAvatar) { newAvatar }
           };
           country = switch (settings.country) {
             case null { user.country };
-            case (newCountry) { newCountry };
+            case (newCountry) { newCountry }
           };
           email = switch (settings.email) {
             case null { user.email };
-            case (email) { email };
-          };
-          votedPosts = user.votedPosts;
-          admissionDate = user.admissionDate;
+            case (email) { email }
+          }
         };
         HashMap.put<UserId, User>(users, Nat.equal, Nat32.fromNat, userId, updateUser)
       }
@@ -269,16 +280,8 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           case null { return null };
           case (?user) {
             // It is suggested to compress the image in the front before sending it to this function
-            var userUpdate = {
-              email = user.email;
-              name = user.name;
-              country = user.country;
-              admissionDate = user.admissionDate;
-              avatar = ?avatar;
-              votedPosts = user.votedPosts;
-            };
-            HashMap.put(users, Nat.equal, Nat32.fromNat, userId, userUpdate);
-            return userUpdate.avatar;
+            HashMap.put(users, Nat.equal, Nat32.fromNat, userId, { user with avatar = ?avatar });
+            return ?avatar
           }
         }
       }
@@ -296,10 +299,10 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           content;
           qualifyQty = 0;
           qualifySum = 0;
-          comments = [];
+          comments = []
         };
         HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, generateId(), pub);
-        #ok(pub);
+        #ok(pub)
       }
     }
   };
@@ -309,23 +312,15 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
       case null { return false };
       case (?pub) {
-        let date = Time.now();
         let commentBuffer = Buffer.fromArray<Comment>(pub.comments);
         let comment = {
           id = generateId();
           autor = caller;
           content;
-          date
+          date = Time.now()
         };
         commentBuffer.add(comment);
-        let updatePub = {
-          autor = pub.autor;
-          date = pub.date;
-          content = pub.content;
-          qualifyQty = pub.qualifyQty;
-          qualifySum = pub.qualifySum;
-          comments = Buffer.toArray(commentBuffer)
-        };
+        let updatePub = { pub with comments = Buffer.toArray(commentBuffer) };
         HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
         return true
       }
@@ -344,20 +339,10 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
             assert (comment.autor == caller);
             let commentsUpdate = Buffer.fromArray<Comment>(pub.comments);
             let old = commentsUpdate.remove(index);
-            let updateComment = {
-              id = old.id;
-              autor = caller;
-              content = _updateContent;
-              date = old.date
-            };
-            commentsUpdate.add(updateComment);
+            commentsUpdate.insert(index, { old with content = _updateContent });
+
             let updatePub = {
-              autor = pub.autor;
-              date = pub.autor;
-              content = pub.content;
-              qualifyQty = pub.qualifyQty;
-              qualifySum = pub.qualifySum;
-              comments = Buffer.toArray<Comment>(commentsUpdate)
+              pub with comments = Buffer.toArray(commentsUpdate)
             };
             HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
             return true
@@ -402,12 +387,9 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
         switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, _id)) {
           case (?pub) {
             let updatePub = {
-              autor = pub.autor;
-              date = pub.date;
-              content = pub.content;
+              pub with
               qualifyQty = pub.qualifyQty + 1;
-              qualifySum = pub.qualifySum + q;
-              comments = pub.comments
+              qualifySum = pub.qualifySum + q
             };
             HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, _id, updatePub);
             return true
