@@ -1,4 +1,4 @@
 export interface AuthSlice {
-    userInfo: any,
-    setUserInfo: (userInfo: any) => void
+  userInfo: any
+  setUserInfo: (userInfo: any) => void
 }
