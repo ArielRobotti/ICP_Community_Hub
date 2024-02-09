@@ -3,7 +3,6 @@ import Principal "mo:base/Principal";
 import HashMap "libs/FunctionalStableHashMap";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import User "./types/user";
 import Time "mo:base/Time";
 
 import Result "mo:base/Result";

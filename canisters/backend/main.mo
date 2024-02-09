@@ -16,7 +16,6 @@ import HashMap "libs/FunctionalStableHashMap";
 import Dao "Dao"; //Actor class for deploying the DAO from this canister
 import Types "./types/Types";
 import { tutoIdHash; tutoIdEqual } = "./types/Types";
-// import User "./types/user";
 
 shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
@@ -139,7 +138,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
         switch autor {
           case null { return #err("Error inesperado :P") };
           case (?autor) {
-            let updatPublications = Buffer.fromArray<Nat>(autor.postPublicated);
+            let updatPublications = Buffer.fromArray<TutoId>(autor.postPublicated);
             updatPublications.add(id);
             let updateAutor = { autor with postPublicated = updatPublications }
           };
