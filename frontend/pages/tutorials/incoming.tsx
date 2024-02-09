@@ -4,17 +4,17 @@ import { Tutorial } from "./types"
 import { useCanister } from "@connect2ic/react"
 
 const Incoming = () => {
-  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
-  const [backend] = useCanister("backend");
+  const [tutorials, setTutorials] = useState<Tutorial[]>([])
+  const [backend] = useCanister("backend")
 
   const fetchTutorials = async () => {
-    const res = await backend.getIncomingPublication() as Tutorial[];
-    console.log("Publications are: ", res);
-    setTutorials(res);
+    const res = (await backend.getIncomingPublication()) as Tutorial[]
+    console.log("Publications are: ", res)
+    setTutorials(res)
   }
 
   useEffect(() => {
-    fetchTutorials();
+    fetchTutorials()
   }, [])
 
   return (
@@ -41,4 +41,3 @@ const Incoming = () => {
 }
 
 export default Incoming
-

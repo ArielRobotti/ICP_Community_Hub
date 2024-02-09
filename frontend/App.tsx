@@ -9,7 +9,6 @@ import "@connect2ic/core/style.css"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
-
 import * as backend from "../.dfx/local/canisters/backend"
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
@@ -79,8 +78,9 @@ const client = createClient({
     new InternetIdentity({
       dev: true,
       // The url for the providers frontend
-      providerUrl: "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai",
-    })
+      providerUrl:
+        "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai",
+    }),
   ],
   globalProviderConfig: {
     // dev: import.meta.env.DEV,

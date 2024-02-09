@@ -7,7 +7,7 @@ const New = () => {
   const [title, setTitle] = useState("")
   const [tags, setTags] = useState("")
   const [html, setHtml] = useState("")
-  const [backend] = useCanister("backend");
+  const [backend] = useCanister("backend")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -18,7 +18,7 @@ const New = () => {
         tags: tags !== "" ? tags : [],
         assets: [],
       }
-      const res = await backend.uploadTutorial(content);
+      const res = await backend.uploadTutorial(content)
       console.log("Tutorial Created?: ", res)
     }
   }
@@ -62,7 +62,16 @@ const New = () => {
             ></input>
           </div>
         </div>
-        <Button primary type="submit" secondary={undefined} success={undefined} warning={undefined} danger={undefined} outline={undefined} rounded={undefined}>
+        <Button
+          primary
+          type="submit"
+          secondary={undefined}
+          success={undefined}
+          warning={undefined}
+          danger={undefined}
+          outline={undefined}
+          rounded={undefined}
+        >
           Guardar
         </Button>
       </form>
