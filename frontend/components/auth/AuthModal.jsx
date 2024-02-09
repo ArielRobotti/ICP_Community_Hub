@@ -6,7 +6,7 @@ import { useAppStore } from "/frontend/store/store"
 
 const AuthModal = () => {
   const [backend] = useCanister("backend");
-  const { principal } = useConnect();
+  const { isConnected } = useConnect();
 
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -21,7 +21,7 @@ const AuthModal = () => {
     if(res) {
       console.log("res is")
       console.log(res);
-      setUserInfo(res)
+      setUserInfo(res.ok)
       setIsAuthModalOpen(false);
     }
     else {
@@ -31,7 +31,8 @@ const AuthModal = () => {
   }
 
   const checkUser = async () => {
-    const res = await backend.getMiUser()
+    const res = await backend.getMiUser();
+    console.log("USer is: ", res)
     if (res?.length > 0){
       setUserInfo(res[0]);
       return true;
@@ -44,7 +45,9 @@ const AuthModal = () => {
     if (!data) {
       setIsAuthModalOpen(true);
     }
-    setIsAuthModalOpen(false);
+    else{
+      setIsAuthModalOpen(false);
+    }
   }
 
   const handleSignup = async (e) => {
@@ -55,10 +58,10 @@ const AuthModal = () => {
   }
 
   useEffect(() => {
-    if (principal){
+    if (isConnected){
       fetchUser();
     }
-  }, [principal]);
+  }, [isConnected]);
 
   return (
     <>
