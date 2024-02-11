@@ -66,9 +66,9 @@ const Incoming = () => {
         {tutorials.map((tutorial, index) => (
           <Card
             key={index}
-            title={tutorial?.title}
-            description={tutorial?.description}
-            author={tutorial?.author}
+            title={tutorial?.content.title}
+            description={tutorial?.content.description}
+            author={tutorial?.autor}
             readTime={5}
             onClick= {() => {}}
             footer={isAdmin ? adminFooter : daoMemberFooter}></Card>
