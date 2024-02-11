@@ -11,13 +11,14 @@ const New = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (title && html) {
+    if (title && html) { 
       const content = {
         title: title,
         html: html,
-        tags: tags !== "" ? tags : [],
+        tags: tags.split(" ").filter(tag => tag.startsWith("#")),
         assets: [],
       }
+      console.log(content)
       const res = await backend.uploadTutorial(content)
       console.log("Tutorial Created?: ", res)
     }

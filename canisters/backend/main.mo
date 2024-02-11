@@ -43,7 +43,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   stable var counterGeneralId = 0;
   stable var DAO = Principal.fromText("aaaaa-aa");
 
-  // -------------- Function to deploy the DAO canister  bw4dl-smaaa-aaaaa-qaacq-cai -----------
+  // -------------- Function to deploy the DAO canister  -----------------------
 
   public shared ({ caller }) func deployDaoCanister(_name : Text, _manifesto : Text, founders : [DaoFounder], extraFees : Nat) : async Principal {
     //Considering that this function will be executed only once, it is suggested to execute it directly from the CLI to
@@ -70,7 +70,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     // 3_150 additional cycles were requested. Repeat the execution placing said ammount in the last parameter of the call instead of 0
 
     assert (isAdmin(caller));
-    assert (not daoIsDeployed()); // This prevents the function from being executed more than once.
+    assert (not _daoIsDeployed()); // This prevents the function from being executed more than once.
     Internal.cyclesAdd(13_846_199_230 + extraFees); // FEE to create a canister 13 846 199 230
     let daoCanister = await Dao.Dao(_name, _manifesto, founders); // Creation of canister for the DAO
     DAO := Principal.fromActor(daoCanister);
@@ -78,7 +78,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   };
 
   // -------------------------- Private Fuctions -------------------------------
-  func daoIsDeployed() : Bool {
+  func _daoIsDeployed() : Bool {
     Principal.fromText("aaaaa-aa") != DAO
   };
 
@@ -118,7 +118,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   func validateEjecution(_caller : Principal) : () {
     ///If the DAO is deployed and _caller is not the DAO it throws an assertion error
     ///If the DAO is NOT deployed and _caller is not an admin it throws an error
-    if (daoIsDeployed()) {
+    if (_daoIsDeployed()) {
       assert _caller == DAO
     } else {
       (assert isAdmin(_caller))
@@ -126,6 +126,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   };
 
   //----- if DAO, only DAO, else only admins -----------------------------------
+
 
   public shared ({ caller }) func aprovePublication(id : Nat) : async Result.Result<(), Text> {
     validateEjecution(caller);
@@ -222,6 +223,8 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
       case _ { true }
     }
   };
+
+  public shared ({caller}) func iamAdmin():async Bool{isAdmin(caller)};
 
   public shared ({ caller }) func getMiId() : async ?Nat {
     assert not Principal.isAnonymous(caller);
@@ -403,6 +406,10 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   //---------------------------------------------------------------------------------
 
   //---------------- Query functions ------------------------------------------------
+
+  public query func isDaoDeployed():async Bool{_daoIsDeployed()};
+
+  public query func getPrincipalDao():async Text{Principal.toText(DAO)};
 
   public query func getUsers() : async [User] {
     //Public??

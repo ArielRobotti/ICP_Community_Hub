@@ -43,7 +43,8 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
         HashMap.put(members, principalEqual, principalHash, founder.principal, member)
     };
 
-    public func isAMember(p : Principal) : async Bool { _isAMember(p) };
+    public shared ({caller}) func isAMember() : async Bool { _isAMember(caller)};
+    public shared ({caller}) func whoAmi(): async Principal {caller};
 
     func _isAMember(p : Principal) : Bool {
         return switch (HashMap.get(members, principalEqual, principalHash, p)) {

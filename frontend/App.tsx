@@ -1,3 +1,9 @@
+
+import { Actor, HttpAgent } from '@dfinity/agent';
+import * as Dao from '../.dfx/local/canisters/dao/dao.did.js';
+
+
+
 import React, { useEffect } from "react"
 /*
  * Connect2ic provides essential utilities for IC app development
@@ -7,9 +13,10 @@ import { InternetIdentity } from "@connect2ic/core/providers"
 import { Connect2ICProvider, useCanister, useConnect } from "@connect2ic/react"
 import "@connect2ic/core/style.css"
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 
 import * as backend from "../.dfx/local/canisters/backend"
+
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
 import { Home } from "./pages/home"
@@ -17,13 +24,41 @@ import { New } from "./pages/tutorials/new"
 import Incoming from "./pages/tutorials/incoming"
 
 function App() {
+  const { isConnected, principal} = useConnect();
   const [backend] = useCanister("backend");
+
+  
+  
+  const rightToVote = async () => {
+    let isDao = await backend.isDaoDeployed();
+    if (isDao){
+      let daoPrincipal = String(await backend.getPrincipalDao());
+      console.log("Dao Principal: ", daoPrincipal) //OK
+
+      const agent = new HttpAgent({});
+      const dao = Actor.createActor(Dao.idlFactory, { agent, canisterId: daoPrincipal });
+
+      // let member = await dao.isAMember(principal);
+      console.log(await dao.getName()); // OK
+      // console.log(await dao.whoAmi()); // Error: Fail to verify certificate
+      // console.log("El usuario es miembro? ", member)
+      // return member;
+    }
+    else{
+      let admin = await backend.iamAdmin();
+      console.log("El usuario ea admin? ", admin)
+      return admin;
+    };
+  };
+  
+  const userDaoMember = rightToVote();
+
+  console.log(userDaoMember);
   const checkUser = async () => {
     // console.log(await backend.getMiUser());
     console.log(await backend.whoAmi());
     console.log("hola")
   };
-  const { isConnected, principal, activeProvider, status,isInitializing , isConnecting, isIdle} = useConnect();
   
   // useEffect(() => {
   //   if (isConnected){
@@ -36,18 +71,6 @@ function App() {
     const fetchData = async () => {
       if (isConnected) {
 
-        console.log(principal);
-        console.log("--------------------");
-        console.log("isConnecting: ", isConnecting);
-        console.log("isConnected: ", isConnected);
-        console.log("isIdle: ", isIdle);
-        console.log("--------------------");
-        console.log("activeProvider: " ,activeProvider);
-        console.log("status: " ,status);
-        console.log("isInitializing: ", isInitializing);
-
-
-        
         await checkUser();
       }
     };
@@ -61,8 +84,15 @@ function App() {
         <Navbar></Navbar>
         <Routes>
           <Route path="/" Component={Home}></Route>
-          {/* <Route path="/tutorials/incoming" Component={Incoming}></Route> */}
-          <Route path="/tutorials/new" Component={New}></Route>
+          <Route 
+            path="/tutorials/incoming" 
+            element={userDaoMember ? <Incoming /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/tutorials/new"
+            element={isConnected ? <New /> : <Navigate to="/" />}
+          />
+
         </Routes>
         <Footer></Footer>
       </div>

@@ -11,27 +11,30 @@ export interface Comment {
 export interface DaoFounder { 'principal' : Principal, 'name' : string }
 export interface ICP_Community_Hub {
   'addAdmin' : ActorMethod<[string], boolean>,
-  'addComment' : ActorMethod<[TutoId, string], boolean>,
+  'addComment' : ActorMethod<[TutoId__1, string], boolean>,
   'aprovePublication' : ActorMethod<[bigint], Result>,
-  'deleteComment' : ActorMethod<[TutoId, bigint], boolean>,
+  'deleteComment' : ActorMethod<[TutoId__1, bigint], boolean>,
   'deployDaoCanister' : ActorMethod<
     [string, string, Array<DaoFounder>, bigint],
     Principal
   >,
-  'editComment' : ActorMethod<[TutoId, bigint, string], boolean>,
-  'getAprovedPublication' : ActorMethod<[], Array<[TutoId, Publication]>>,
+  'editComment' : ActorMethod<[TutoId__1, bigint, string], boolean>,
+  'getAprovedPublication' : ActorMethod<[], Array<[TutoId__1, Publication]>>,
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
   'getMiUser' : ActorMethod<[], [] | [User]>,
+  'getPrincipalDao' : ActorMethod<[], string>,
   'getPubByID' : ActorMethod<[bigint], [] | [Publication]>,
   'getPubFromUser' : ActorMethod<[bigint], Array<Publication>>,
   'getUsers' : ActorMethod<[], Array<User>>,
+  'iamAdmin' : ActorMethod<[], boolean>,
   'iamRegistered' : ActorMethod<[], boolean>,
+  'isDaoDeployed' : ActorMethod<[], boolean>,
   'loadAvatar' : ActorMethod<
     [Uint8Array | number[]],
     [] | [Uint8Array | number[]]
   >,
-  'qualifyPost' : ActorMethod<[TutoId, bigint], boolean>,
+  'qualifyPost' : ActorMethod<[TutoId__1, bigint], boolean>,
   'rejectPublication' : ActorMethod<[bigint], Result>,
   'search' : ActorMethod<[string], Array<Publication>>,
   'signUp' : ActorMethod<
@@ -60,6 +63,7 @@ export type SignUpErrors = { 'InBlackList' : null } |
 export type SignUpResult = { 'ok' : User } |
   { 'err' : SignUpErrors };
 export type TutoId = bigint;
+export type TutoId__1 = bigint;
 export interface Tutorial {
   'title' : string,
   'html' : string,
@@ -77,6 +81,7 @@ export interface User {
   'admissionDate' : bigint,
   'name' : string,
   'email' : [] | [string],
+  'postPublicated' : Array<TutoId>,
   'votedPosts' : Array<bigint>,
   'avatar' : [] | [Uint8Array | number[]],
 }

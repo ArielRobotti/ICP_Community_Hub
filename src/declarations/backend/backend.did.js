@@ -1,5 +1,5 @@
 export const idlFactory = ({ IDL }) => {
-  const TutoId = IDL.Nat;
+  const TutoId__1 = IDL.Nat;
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const DaoFounder = IDL.Record({
     'principal' : IDL.Principal,
@@ -25,11 +25,13 @@ export const idlFactory = ({ IDL }) => {
     'qualifySum' : IDL.Nat,
     'comments' : IDL.Vec(Comment),
   });
+  const TutoId = IDL.Nat;
   const User = IDL.Record({
     'country' : IDL.Opt(IDL.Text),
     'admissionDate' : IDL.Int,
     'name' : IDL.Text,
     'email' : IDL.Opt(IDL.Text),
+    'postPublicated' : IDL.Vec(TutoId),
     'votedPosts' : IDL.Vec(IDL.Nat),
     'avatar' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
@@ -54,33 +56,36 @@ export const idlFactory = ({ IDL }) => {
   });
   const ICP_Community_Hub = IDL.Service({
     'addAdmin' : IDL.Func([IDL.Text], [IDL.Bool], []),
-    'addComment' : IDL.Func([TutoId, IDL.Text], [IDL.Bool], []),
+    'addComment' : IDL.Func([TutoId__1, IDL.Text], [IDL.Bool], []),
     'aprovePublication' : IDL.Func([IDL.Nat], [Result], []),
-    'deleteComment' : IDL.Func([TutoId, IDL.Nat], [IDL.Bool], []),
+    'deleteComment' : IDL.Func([TutoId__1, IDL.Nat], [IDL.Bool], []),
     'deployDaoCanister' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(DaoFounder), IDL.Nat],
         [IDL.Principal],
         [],
       ),
-    'editComment' : IDL.Func([TutoId, IDL.Nat, IDL.Text], [IDL.Bool], []),
+    'editComment' : IDL.Func([TutoId__1, IDL.Nat, IDL.Text], [IDL.Bool], []),
     'getAprovedPublication' : IDL.Func(
         [],
-        [IDL.Vec(IDL.Tuple(TutoId, Publication))],
+        [IDL.Vec(IDL.Tuple(TutoId__1, Publication))],
         ['query'],
       ),
     'getIncomingPublication' : IDL.Func([], [IDL.Vec(Publication)], []),
     'getMiId' : IDL.Func([], [IDL.Opt(IDL.Nat)], []),
     'getMiUser' : IDL.Func([], [IDL.Opt(User)], []),
+    'getPrincipalDao' : IDL.Func([], [IDL.Text], ['query']),
     'getPubByID' : IDL.Func([IDL.Nat], [IDL.Opt(Publication)], ['query']),
     'getPubFromUser' : IDL.Func([IDL.Nat], [IDL.Vec(Publication)], ['query']),
     'getUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+    'iamAdmin' : IDL.Func([], [IDL.Bool], []),
     'iamRegistered' : IDL.Func([], [IDL.Bool], []),
+    'isDaoDeployed' : IDL.Func([], [IDL.Bool], ['query']),
     'loadAvatar' : IDL.Func(
         [IDL.Vec(IDL.Nat8)],
         [IDL.Opt(IDL.Vec(IDL.Nat8))],
         [],
       ),
-    'qualifyPost' : IDL.Func([TutoId, IDL.Nat], [IDL.Bool], []),
+    'qualifyPost' : IDL.Func([TutoId__1, IDL.Nat], [IDL.Bool], []),
     'rejectPublication' : IDL.Func([IDL.Nat], [Result], []),
     'search' : IDL.Func([IDL.Text], [IDL.Vec(Publication)], ['query']),
     'signUp' : IDL.Func(
