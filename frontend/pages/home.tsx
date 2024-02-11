@@ -2,6 +2,7 @@ import React from "react"
 import { useNavigate } from "react-router-dom";
 import { useConnect } from "@connect2ic/react"
 import AuthModal from "../components/auth/AuthModal";
+import Approved from "./tutorials/approved";
 
 const Home = () => {
 
@@ -39,6 +40,9 @@ const Home = () => {
           </a>
         </div>
       </div>
+      <section>
+        <Approved></Approved>
+      </section>
       { isConnected && (
         <AuthModal></AuthModal>
       )}

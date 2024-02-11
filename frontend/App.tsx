@@ -15,6 +15,7 @@ import Footer from "./components/layout/Footer"
 import { Home } from "./pages/home"
 import { New } from "./pages/tutorials/new"
 import Incoming from "./pages/tutorials/incoming"
+import Approved from "./pages/tutorials/approved"
 
 function App() {
   const [backend] = useCanister("backend");
@@ -63,6 +64,7 @@ function App() {
           <Route path="/" Component={Home}></Route>
           {/* <Route path="/tutorials/incoming" Component={Incoming}></Route> */}
           <Route path="/tutorials/new" Component={New}></Route>
+          <Route path="/tutorials" Component={Approved}></Route>
         </Routes>
         <Footer></Footer>
       </div>
