@@ -67,7 +67,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           };
 
       }, 0)' */
-    // 3_150 additional cycles were requested. Repeat the execution placing said ammount in the last parameter of the call instead of 0
+    // if 'n'  additional cycles were requested. Repeat the execution placing 'n' in the last parameter of the call instead of 0
 
     assert (isAdmin(caller));
     assert (not _daoIsDeployed()); // This prevents the function from being executed more than once.
@@ -126,6 +126,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   };
   //----- temporarily defined due to communication error between front and DAO ----
   public shared ({ caller }) func votePublication(_id : TutoId, _vote : Bool): async Bool{
+    assert isUser(caller);
     assert _daoIsDeployed();
     let date = Time.now();
     let daoActor = actor (Principal.toText(DAO)) : actor {
@@ -133,6 +134,8 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     };
     return await daoActor.votePublication(caller,_id, date, _vote);
   };
+
+  
 
   //----- if DAO, only DAO, else only admins -----------------------------------
 
@@ -304,7 +307,9 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
       case null { return #err("Caller is not a member") };
       case (?userId) {
         let date = Time.now() / 1_000_000_000 : Int;
+        let id = generateId();
         let pub = {
+          id;
           autor = userId;
           date;
           content;
@@ -312,7 +317,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           qualifySum = 0;
           comments = []
         };
-        HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, generateId(), pub);
+        HashMap.put(incomingPublications, tutoIdEqual, tutoIdHash, id, pub);
         #ok(pub)
       }
     }
@@ -419,6 +424,18 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   public query func isDaoDeployed():async Bool{_daoIsDeployed()};
 
   public query func getPrincipalDao():async Text{Principal.toText(DAO)};
+
+  public shared ({caller}) func userIsDaoMember(): async Bool{
+    assert (await isDaoDeployed());
+    let daoActor = actor (Principal.toText(DAO)) : actor {
+      getPrincipalMembers : shared () -> async [Principal];
+    }; 
+    let members: [Principal] = await daoActor.getPrincipalMembers();
+    for(i in members.vals()){
+      if(i == caller){return true};
+    };
+    return false;
+  };
 
   public query func getUsers() : async [User] {
     //Public??

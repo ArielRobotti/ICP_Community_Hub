@@ -12,12 +12,13 @@ type User =
    country: opt text;
    email: opt text;
    name: text;
-   postPublicated: vec TutoId;
+   postPublicated: vec TutoId__1;
    votedPosts: vec nat;
  };
 type Tutorial__1 = 
  record {
    assets: vec blob;
+   description: text;
    html: text;
    tags: vec text;
    title: text;
@@ -25,6 +26,7 @@ type Tutorial__1 =
 type Tutorial = 
  record {
    assets: vec blob;
+   description: text;
    html: text;
    tags: vec text;
    title: text;
@@ -58,19 +60,20 @@ type Publication =
    comments: vec Comment;
    content: Tutorial__1;
    date: int;
+   id: TutoId__1;
    qualifyQty: nat;
    qualifySum: nat;
  };
 type ICP_Community_Hub = 
  service {
    addAdmin: (text) -> (bool);
-   addComment: (TutoId__1, text) -> (bool);
+   addComment: (TutoId, text) -> (bool);
    aprovePublication: (nat) -> (Result);
-   deleteComment: (TutoId__1, nat) -> (bool);
+   deleteComment: (TutoId, nat) -> (bool);
    deployDaoCanister: (text, text, vec DaoFounder, nat) -> (principal);
-   editComment: (TutoId__1, nat, text) -> (bool);
+   editComment: (TutoId, nat, text) -> (bool);
    getAprovedPublication: () -> (vec record {
-                                       TutoId__1;
+                                       TutoId;
                                        Publication;
                                      }) query;
    getIncomingPublication: () -> (vec Publication);
@@ -84,12 +87,14 @@ type ICP_Community_Hub =
    iamRegistered: () -> (bool);
    isDaoDeployed: () -> (bool) query;
    loadAvatar: (blob) -> (opt blob);
-   qualifyPost: (TutoId__1, nat) -> (bool);
+   qualifyPost: (TutoId, nat) -> (bool);
    rejectPublication: (nat) -> (Result);
    search: (text) -> (vec Publication) query;
    signUp: (text, opt text, opt blob) -> (SignUpResult);
    uploadTutorial: (Tutorial) -> (PublishResult);
    userConfig: (UserSettings) -> ();
+   userIsDaoMember: () -> (bool);
+   votePublication: (TutoId, bool) -> (bool);
    whoAmi: () -> (text) query;
  };
 type DaoFounder = 

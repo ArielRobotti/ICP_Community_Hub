@@ -11,15 +11,15 @@ export interface Comment {
 export interface DaoFounder { 'principal' : Principal, 'name' : string }
 export interface ICP_Community_Hub {
   'addAdmin' : ActorMethod<[string], boolean>,
-  'addComment' : ActorMethod<[TutoId__1, string], boolean>,
+  'addComment' : ActorMethod<[TutoId, string], boolean>,
   'aprovePublication' : ActorMethod<[bigint], Result>,
-  'deleteComment' : ActorMethod<[TutoId__1, bigint], boolean>,
+  'deleteComment' : ActorMethod<[TutoId, bigint], boolean>,
   'deployDaoCanister' : ActorMethod<
     [string, string, Array<DaoFounder>, bigint],
     Principal
   >,
-  'editComment' : ActorMethod<[TutoId__1, bigint, string], boolean>,
-  'getAprovedPublication' : ActorMethod<[], Array<[TutoId__1, Publication]>>,
+  'editComment' : ActorMethod<[TutoId, bigint, string], boolean>,
+  'getAprovedPublication' : ActorMethod<[], Array<[TutoId, Publication]>>,
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
   'getMiUser' : ActorMethod<[], [] | [User]>,
@@ -34,7 +34,7 @@ export interface ICP_Community_Hub {
     [Uint8Array | number[]],
     [] | [Uint8Array | number[]]
   >,
-  'qualifyPost' : ActorMethod<[TutoId__1, bigint], boolean>,
+  'qualifyPost' : ActorMethod<[TutoId, bigint], boolean>,
   'rejectPublication' : ActorMethod<[bigint], Result>,
   'search' : ActorMethod<[string], Array<Publication>>,
   'signUp' : ActorMethod<
@@ -43,9 +43,12 @@ export interface ICP_Community_Hub {
   >,
   'uploadTutorial' : ActorMethod<[Tutorial], PublishResult>,
   'userConfig' : ActorMethod<[UserSettings], undefined>,
+  'userIsDaoMember' : ActorMethod<[], boolean>,
+  'votePublication' : ActorMethod<[TutoId, boolean], boolean>,
   'whoAmi' : ActorMethod<[], string>,
 }
 export interface Publication {
+  'id' : TutoId__1,
   'content' : Tutorial__1,
   'autor' : bigint,
   'date' : bigint,
@@ -69,19 +72,21 @@ export interface Tutorial {
   'html' : string,
   'assets' : Array<Uint8Array | number[]>,
   'tags' : Array<string>,
+  'description' : string,
 }
 export interface Tutorial__1 {
   'title' : string,
   'html' : string,
   'assets' : Array<Uint8Array | number[]>,
   'tags' : Array<string>,
+  'description' : string,
 }
 export interface User {
   'country' : [] | [string],
   'admissionDate' : bigint,
   'name' : string,
   'email' : [] | [string],
-  'postPublicated' : Array<TutoId>,
+  'postPublicated' : Array<TutoId__1>,
   'votedPosts' : Array<bigint>,
   'avatar' : [] | [Uint8Array | number[]],
 }

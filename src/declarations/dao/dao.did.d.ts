@@ -8,9 +8,13 @@ export interface Dao {
   'eneableMember' : ActorMethod<[Principal], boolean>,
   'getManifesto' : ActorMethod<[], string>,
   'getName' : ActorMethod<[], string>,
+  'getPrincipalMembers' : ActorMethod<[], Array<Principal>>,
   'getmembersQty' : ActorMethod<[], bigint>,
   'isAMember' : ActorMethod<[], boolean>,
-  'votePublication' : ActorMethod<[TutoId, bigint, boolean], boolean>,
+  'votePublication' : ActorMethod<
+    [Principal, TutoId, bigint, boolean],
+    boolean
+  >,
   'whoAmi' : ActorMethod<[], Principal>,
 }
 export interface DaoFounder { 'principal' : Principal, 'name' : string }

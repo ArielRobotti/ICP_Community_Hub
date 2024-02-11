@@ -53,6 +53,7 @@ module {
 
     public type Tutorial = {
         title : Text; //Limitar a 100 caracteres
+        description: Text;
         tags : [Text];
         html : Text; //Se genera automaticamente desde el front
         assets : [Blob];
@@ -65,6 +66,7 @@ module {
     public func tutoIdEqual(a : TutoId, b : TutoId) : Bool { a == b };
 
     public type Publication = {
+        id: TutoId;
         autor : Nat;
         date : Int; //Timestamp
         content : Tutorial;

@@ -10,9 +10,14 @@ export const idlFactory = ({ IDL }) => {
     'eneableMember' : IDL.Func([IDL.Principal], [IDL.Bool], []),
     'getManifesto' : IDL.Func([], [IDL.Text], ['query']),
     'getName' : IDL.Func([], [IDL.Text], ['query']),
+    'getPrincipalMembers' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
     'getmembersQty' : IDL.Func([], [IDL.Nat], ['query']),
     'isAMember' : IDL.Func([], [IDL.Bool], []),
-    'votePublication' : IDL.Func([TutoId, IDL.Int, IDL.Bool], [IDL.Bool], []),
+    'votePublication' : IDL.Func(
+        [IDL.Principal, TutoId, IDL.Int, IDL.Bool],
+        [IDL.Bool],
+        [],
+      ),
     'whoAmi' : IDL.Func([], [IDL.Principal], []),
   });
   return Dao;

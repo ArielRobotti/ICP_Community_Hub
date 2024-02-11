@@ -11,9 +11,10 @@ type Dao =
    eneableMember: (principal) -> (bool);
    getManifesto: () -> (text) query;
    getName: () -> (text) query;
+   getPrincipalMembers: () -> (vec principal) query;
    getmembersQty: () -> (nat) query;
    isAMember: () -> (bool);
-   votePublication: (TutoId, int, bool) -> (bool);
+   votePublication: (principal, TutoId, int, bool) -> (bool);
    whoAmi: () -> (principal);
  };
 service : (text, text, vec DaoFounder) -> Dao

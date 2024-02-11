@@ -32,45 +32,42 @@ function App() {
   const rightToVote = async () => {
     let isDao = await backend.isDaoDeployed();
     if (isDao){
-      let daoPrincipal = String(await backend.getPrincipalDao());
+      /*let daoPrincipal = String(await backend.getPrincipalDao());
       console.log("Dao Principal: ", daoPrincipal) //OK
 
       const agent = new HttpAgent({});
       const dao = Actor.createActor(Dao.idlFactory, { agent, canisterId: daoPrincipal });
 
-      // let member = await dao.isAMember(principal);
       console.log(await dao.getName()); // OK
-      // console.log(await dao.whoAmi()); // Error: Fail to verify certificate
-      // console.log("El usuario es miembro? ", member)
-      // return member;
+      console.log(await dao.whoAmi()); // Error: Fail to verify certificate
+      let member = await dao.isAMember(principal);
+      return member;
+      */
+      //----- Modificar al solucionar Front -> DAO ------
+      let isMember = await backend.userIsDaoMember();
+      console.log("Is Dao member? ", isMember);
+      return isMember ? true: false;
+      
     }
     else{
-      let admin = await backend.iamAdmin();
-      console.log("El usuario ea admin? ", admin)
-      return admin;
+      let isAdmin = await backend.iamAdmin();
+      console.log("Is admin? ", isAdmin);
+      return isAdmin ? true: false;      
     };
   };
   
-  const userDaoMember = rightToVote();
-
+  let userDaoMember = false;
   console.log(userDaoMember);
+
   const checkUser = async () => {
     // console.log(await backend.getMiUser());
     console.log(await backend.whoAmi());
-    console.log("hola")
   };
   
-  // useEffect(() => {
-  //   if (isConnected){
-  //     console.log(principal)
-      
-  //     checkUser();
-  //   }
-  // }, [isConnected]);
   useEffect(() => {
     const fetchData = async () => {
       if (isConnected) {
-
+        userDaoMember = await rightToVote();
         await checkUser();
       }
     };

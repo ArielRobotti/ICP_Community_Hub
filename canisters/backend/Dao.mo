@@ -30,9 +30,15 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
     public query func getManifesto() : async Text { manifesto };
     public query func getmembersQty() : async Nat { HashMap.size(members) };
 
+    //------ eliminar cuando se solucine comunicacion front -> Dao---
+    public query func getPrincipalMembers(): async [Principal]{
+        return Iter.toArray<Principal>(HashMap.keys<Principal,Member>(members));
+    };
+
     let members = HashMap.init<Principal, Member>();
+
     for (founder in founders.vals()) {
-        let member = {
+        let member: Member = {
             name = founder.name;
             admissionDate = deployTimeStamp;
             enabled = true;
