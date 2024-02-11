@@ -5,15 +5,17 @@ import TextAreaMD from "../../components/common/TextAreaMD"
 
 const New = () => {
   const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
   const [tags, setTags] = useState("")
   const [html, setHtml] = useState("")
   const [backend] = useCanister("backend")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (title && html) { 
+    if (title && html) {
       const content = {
         title: title,
+        description: description,
         html: html,
         tags: tags.split(" ").filter(tag => tag.startsWith("#")),
         assets: [],
@@ -43,6 +45,21 @@ const New = () => {
               }}
             ></input>
             <span>{title.length}/100</span>
+          </div>
+          <div className="mb-3 flex flex-col">
+            <label htmlFor="description" className="font-semibold text-2xl">
+              Descripción del tutorial
+            </label>
+            <textarea
+              className="border border-gray-300 rounded-lg active:border-gray-950 p-4 text-lg dark:bg-neutral-900 dark:border-gray-900"
+              value={description}
+              onChange={(e) => {
+                if (e.target.value.length <= 1000) {
+                  setDescription(e.target.value);
+                }
+              }}
+            ></textarea>
+            <span>{description.length}/1000</span>
           </div>
           <div className="mb-3 flex flex-col">
             <label htmlFor="html" className="font-semibold text-2xl">

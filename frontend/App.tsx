@@ -31,6 +31,7 @@ function App() {
   
   const rightToVote = async () => {
     let isDao = await backend.isDaoDeployed();
+    console.log("Dao deployed? ", isDao);
     if (isDao){
       /*let daoPrincipal = String(await backend.getPrincipalDao());
       console.log("Dao Principal: ", daoPrincipal) //OK
@@ -46,7 +47,7 @@ function App() {
       //----- Modificar al solucionar Front -> DAO ------
       let isMember = await backend.userIsDaoMember();
       console.log("Is Dao member? ", isMember);
-      return isMember ? true: false;
+      return isMember? true: false;
       
     }
     else{
@@ -57,10 +58,8 @@ function App() {
   };
   
   let userDaoMember = false;
-  console.log(userDaoMember);
 
   const checkUser = async () => {
-    // console.log(await backend.getMiUser());
     console.log(await backend.whoAmi());
   };
   
@@ -68,10 +67,8 @@ function App() {
     const fetchData = async () => {
       if (isConnected) {
         userDaoMember = await rightToVote();
-        await checkUser();
       }
     };
-  
     fetchData();
   }, [isConnected, principal]);
 
