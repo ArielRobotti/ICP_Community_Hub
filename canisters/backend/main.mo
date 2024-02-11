@@ -124,6 +124,15 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
       (assert isAdmin(_caller))
     }
   };
+  //----- temporarily defined due to communication error between front and DAO ----
+  public shared ({ caller }) func votePublication(_id : TutoId, _vote : Bool): async Bool{
+    assert _daoIsDeployed();
+    let date = Time.now();
+    let daoActor = actor (Principal.toText(DAO)) : actor {
+      votePublication : shared (Principal, TutoId, Int, Bool) -> async Bool
+    };
+    return await daoActor.votePublication(caller,_id, date, _vote);
+  };
 
   //----- if DAO, only DAO, else only admins -----------------------------------
 
