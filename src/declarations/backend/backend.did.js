@@ -5,11 +5,13 @@ export const idlFactory = ({ IDL }) => {
     'principal' : IDL.Principal,
     'name' : IDL.Text,
   });
+  const TutoId__1 = IDL.Nat;
   const Tutorial__1 = IDL.Record({
     'title' : IDL.Text,
     'html' : IDL.Text,
     'assets' : IDL.Vec(IDL.Vec(IDL.Nat8)),
     'tags' : IDL.Vec(IDL.Text),
+    'description' : IDL.Text,
   });
   const Comment = IDL.Record({
     'id' : IDL.Nat,
@@ -18,6 +20,7 @@ export const idlFactory = ({ IDL }) => {
     'date' : IDL.Int,
   });
   const Publication = IDL.Record({
+    'id' : TutoId__1,
     'content' : Tutorial__1,
     'autor' : IDL.Nat,
     'date' : IDL.Int,
@@ -30,6 +33,7 @@ export const idlFactory = ({ IDL }) => {
     'admissionDate' : IDL.Int,
     'name' : IDL.Text,
     'email' : IDL.Opt(IDL.Text),
+    'postPublicated' : IDL.Vec(TutoId__1),
     'votedPosts' : IDL.Vec(IDL.Nat),
     'avatar' : IDL.Opt(IDL.Vec(IDL.Nat8)),
   });
@@ -44,6 +48,7 @@ export const idlFactory = ({ IDL }) => {
     'html' : IDL.Text,
     'assets' : IDL.Vec(IDL.Vec(IDL.Nat8)),
     'tags' : IDL.Vec(IDL.Text),
+    'description' : IDL.Text,
   });
   const PublishResult = IDL.Variant({ 'ok' : Publication, 'err' : IDL.Text });
   const UserSettings = IDL.Record({
@@ -71,10 +76,13 @@ export const idlFactory = ({ IDL }) => {
     'getIncomingPublication' : IDL.Func([], [IDL.Vec(Publication)], []),
     'getMiId' : IDL.Func([], [IDL.Opt(IDL.Nat)], []),
     'getMiUser' : IDL.Func([], [IDL.Opt(User)], []),
+    'getPrincipalDao' : IDL.Func([], [IDL.Text], ['query']),
     'getPubByID' : IDL.Func([IDL.Nat], [IDL.Opt(Publication)], ['query']),
     'getPubFromUser' : IDL.Func([IDL.Nat], [IDL.Vec(Publication)], ['query']),
     'getUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+    'iamAdmin' : IDL.Func([], [IDL.Bool], []),
     'iamRegistered' : IDL.Func([], [IDL.Bool], []),
+    'isDaoDeployed' : IDL.Func([], [IDL.Bool], ['query']),
     'loadAvatar' : IDL.Func(
         [IDL.Vec(IDL.Nat8)],
         [IDL.Opt(IDL.Vec(IDL.Nat8))],
@@ -90,6 +98,8 @@ export const idlFactory = ({ IDL }) => {
       ),
     'uploadTutorial' : IDL.Func([Tutorial], [PublishResult], []),
     'userConfig' : IDL.Func([UserSettings], [], []),
+    'userIsDaoMember' : IDL.Func([], [IDL.Bool], []),
+    'votePublication' : IDL.Func([TutoId, IDL.Bool], [IDL.Bool], []),
     'whoAmi' : IDL.Func([], [IDL.Text], ['query']),
   });
   return ICP_Community_Hub;

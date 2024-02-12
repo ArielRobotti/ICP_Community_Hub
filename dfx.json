@@ -4,6 +4,8 @@
       "main": "canisters/backend/main.mo",
       "type": "motoko"
     },
+    
+    
     "assets": {
       "frontend": {
         "entrypoint": "dist/index.html"

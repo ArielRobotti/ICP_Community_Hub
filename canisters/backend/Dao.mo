@@ -30,9 +30,15 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
     public query func getManifesto() : async Text { manifesto };
     public query func getmembersQty() : async Nat { HashMap.size(members) };
 
+    //------ eliminar cuando se solucine comunicacion front -> Dao---
+    public query func getPrincipalMembers(): async [Principal]{
+        return Iter.toArray<Principal>(HashMap.keys<Principal,Member>(members));
+    };
+
     let members = HashMap.init<Principal, Member>();
+
     for (founder in founders.vals()) {
-        let member = {
+        let member: Member = {
             name = founder.name;
             admissionDate = deployTimeStamp;
             enabled = true;
@@ -43,7 +49,8 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
         HashMap.put(members, principalEqual, principalHash, founder.principal, member)
     };
 
-    public func isAMember(p : Principal) : async Bool { _isAMember(p) };
+    public shared ({caller}) func isAMember() : async Bool { _isAMember(caller)};
+    public shared ({caller}) func whoAmi(): async Principal {caller};
 
     func _isAMember(p : Principal) : Bool {
         return switch (HashMap.get(members, principalEqual, principalHash, p)) {
@@ -102,12 +109,55 @@ shared ({ caller }) actor class Dao(name : Text, manifesto : Text, founders : [T
     };
 
     // ----------------- Intercation with masterCanister and frontend canister-----------------------------
-
+/* ---- Momentaneamente las llamadas desde el front no estan siendo posibles esta funcion será ejecutada temporalmente
+a traves del canister principla
     public shared ({ caller }) func votePublication(_id : TutoId, _date : Int, _vote : Bool) : async Bool {
         //This function will be executed from the front of the platform through a direct reference to this canister
         //Warning: Critical vulnerability. TODO: Prevent calls from being made with false information
         //From the front the Id of the publication, its date field and the vote of the DAO member are sent
         let member = HashMap.get(members, principalEqual, principalHash, caller);
+        switch (member) {
+            case null { return false };
+            case (?member) {
+                let currentDate = Time.now() / 1_000_000_000 : Int;
+
+                for (id in member.votedTutoId.vals()) {
+                    if (id == _id) { return false }
+                };
+
+                let status = switch (HashMap.get(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id)) {
+                    case null {
+                        {
+                            startRound = _date;
+                            votes = 1;
+                            balance = if (_vote) { 1 } else { -1 };
+                            end = false;
+                        }
+                    };
+                    case (?oldStatus) {
+                        if (_date != oldStatus.startRound) {
+                            return false
+                        };
+                        let vote = if (_vote) { 1 : Int } else { -1 : Int };
+                        {
+                            startRound = _date;
+                            votes = oldStatus.votes + 1;
+                            balance = oldStatus.balance + vote;
+                            end = false;
+                        }
+                    }
+                };
+                HashMap.put(postsInTheVotingProcess, tutoIdEqual, tutoIdHash, _id, status);
+                await tryPublicate(_id, currentDate);
+                return true
+            }
+        }
+    };
+ */
+
+ public shared ({ caller }) func votePublication(_member: Principal, _id : TutoId, _date : Int, _vote : Bool) : async Bool {
+        assert (caller == masterPlatform);
+        let member = HashMap.get(members, principalEqual, principalHash, _member);
         switch (member) {
             case null { return false };
             case (?member) {

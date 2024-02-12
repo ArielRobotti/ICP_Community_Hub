@@ -23,10 +23,13 @@ export interface ICP_Community_Hub {
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
   'getMiUser' : ActorMethod<[], [] | [User]>,
+  'getPrincipalDao' : ActorMethod<[], string>,
   'getPubByID' : ActorMethod<[bigint], [] | [Publication]>,
   'getPubFromUser' : ActorMethod<[bigint], Array<Publication>>,
   'getUsers' : ActorMethod<[], Array<User>>,
+  'iamAdmin' : ActorMethod<[], boolean>,
   'iamRegistered' : ActorMethod<[], boolean>,
+  'isDaoDeployed' : ActorMethod<[], boolean>,
   'loadAvatar' : ActorMethod<
     [Uint8Array | number[]],
     [] | [Uint8Array | number[]]
@@ -40,9 +43,12 @@ export interface ICP_Community_Hub {
   >,
   'uploadTutorial' : ActorMethod<[Tutorial], PublishResult>,
   'userConfig' : ActorMethod<[UserSettings], undefined>,
+  'userIsDaoMember' : ActorMethod<[], boolean>,
+  'votePublication' : ActorMethod<[TutoId, boolean], boolean>,
   'whoAmi' : ActorMethod<[], string>,
 }
 export interface Publication {
+  'id' : TutoId__1,
   'content' : Tutorial__1,
   'autor' : bigint,
   'date' : bigint,
@@ -60,23 +66,27 @@ export type SignUpErrors = { 'InBlackList' : null } |
 export type SignUpResult = { 'ok' : User } |
   { 'err' : SignUpErrors };
 export type TutoId = bigint;
+export type TutoId__1 = bigint;
 export interface Tutorial {
   'title' : string,
   'html' : string,
   'assets' : Array<Uint8Array | number[]>,
   'tags' : Array<string>,
+  'description' : string,
 }
 export interface Tutorial__1 {
   'title' : string,
   'html' : string,
   'assets' : Array<Uint8Array | number[]>,
   'tags' : Array<string>,
+  'description' : string,
 }
 export interface User {
   'country' : [] | [string],
   'admissionDate' : bigint,
   'name' : string,
   'email' : [] | [string],
+  'postPublicated' : Array<TutoId__1>,
   'votedPosts' : Array<bigint>,
   'avatar' : [] | [Uint8Array | number[]],
 }

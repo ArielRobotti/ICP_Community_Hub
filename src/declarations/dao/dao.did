@@ -1,0 +1,20 @@
+type TutoId = nat;
+type DaoFounder = 
+ record {
+   name: text;
+   "principal": principal;
+ };
+type Dao = 
+ service {
+   addMember: (principal, text) -> (bool);
+   disableMember: (principal) -> (bool);
+   eneableMember: (principal) -> (bool);
+   getManifesto: () -> (text) query;
+   getName: () -> (text) query;
+   getPrincipalMembers: () -> (vec principal) query;
+   getmembersQty: () -> (nat) query;
+   isAMember: () -> (bool);
+   votePublication: (principal, TutoId, int, bool) -> (bool);
+   whoAmi: () -> (principal);
+ };
+service : (text, text, vec DaoFounder) -> Dao
