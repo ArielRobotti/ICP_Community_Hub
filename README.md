@@ -19,7 +19,9 @@ Developer resources
 
 ## Arquitecture.
   <img width="395" alt="image" src="https://github.com/ArielRobotti/ICP_Community_Hub/assets/80497634/7695717e-583d-4a6b-8687-9cbed583f86a">
+  
   The app uses thre canisters that interact with each other, the frontend canister with the UI, the backend canister with business logic, and the DAO canister for the community decision process. It also uses an Internet Identity local canister for development.
+  
   ![image](https://github.com/ArielRobotti/ICP_Community_Hub/assets/80497634/0bf18e93-bfcd-4872-9cb2-040d0af953a7)
 
 ## Installation
