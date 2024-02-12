@@ -2,6 +2,7 @@ import { useCanister } from "@connect2ic/react";
 import React, { useEffect, useState } from "react"
 import { useParams } from "react-router-dom";
 import { Tutorial } from "./types";
+import ReactMarkdown from "react-markdown"
 
 const Details = () => {
 
@@ -38,6 +39,9 @@ const Details = () => {
             <p>{tutorial?.date}</p>
             {/* TODO: Add comment section*/}
           </div>
+        </div>
+        <div>
+          <ReactMarkdown>{tutorial?.content.html}</ReactMarkdown>
         </div>
       </div>
     </div>
