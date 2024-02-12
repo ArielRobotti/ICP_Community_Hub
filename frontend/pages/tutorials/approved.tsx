@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Tutorial } from "./types";
 import { useCanister } from "@connect2ic/react";
 import Card from "frontend/components/common/Card";
+import { useNavigate } from "react-router-dom";
 
 const Approved = () => {
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [backend] = useCanister("backend");
+  const navigate = useNavigate();
 
 
   const fetchTutorials = async () => {
@@ -34,7 +36,7 @@ const Approved = () => {
             description={tutorial?.content.description}
             author={tutorial?.autor}
             readTime={5}
-            onClick={() => { } }
+            onClick={() => navigate(`/tutorials/${tutorial.id}`) }
             footer={undefined}></Card>
         ))}
       </div>

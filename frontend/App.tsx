@@ -16,6 +16,7 @@ import { Home } from "./pages/home"
 import { New } from "./pages/tutorials/new"
 import Incoming from "./pages/tutorials/incoming"
 import Approved from "./pages/tutorials/approved"
+import Details from "./pages/tutorials/details"
 
 function App() {
   const [backend] = useCanister("backend");
@@ -65,6 +66,7 @@ function App() {
           {/* <Route path="/tutorials/incoming" Component={Incoming}></Route> */}
           <Route path="/tutorials/new" Component={New}></Route>
           <Route path="/tutorials" Component={Approved}></Route>
+          <Route path="/tutorials/:id" Component={Details}></Route>
         </Routes>
         <Footer></Footer>
       </div>

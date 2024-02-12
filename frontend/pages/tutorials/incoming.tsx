@@ -2,11 +2,13 @@ import Card from "../../components/common/Card"
 import React, { useState, useEffect } from "react"
 import { Tutorial } from "./types"
 import { useCanister } from "@connect2ic/react"
+import { useNavigate } from "react-router-dom"
 
 const Incoming = () => {
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [backend] = useCanister("backend");
+  const navigate = useNavigate();
 
   const fetchTutorials = async () => {
     const res = (await backend.getIncomingPublication()) as Tutorial[];
@@ -70,7 +72,7 @@ const Incoming = () => {
             description={tutorial?.content.description}
             author={tutorial?.autor}
             readTime={5}
-            onClick= {() => {}}
+            onClick= {() => navigate(`/tutorials/${tutorial.id}`)}
             footer={isAdmin ? adminFooter : daoMemberFooter}></Card>
         ))}
       </div>
