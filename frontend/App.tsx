@@ -17,14 +17,16 @@ import { Home } from "./pages/home"
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
 import { New } from "./pages/tutorials/new"
-import * as backend from "../.dfx/local/canisters/backend"
-import * as dao from "../.dfx/local/canisters/backend";
+import * as backend from "../src/declarations/backend"
+import {User} from "../src/declarations/backend/backend.did";
+import * as dao from "../src/declarations/backend";
 
 
 function App() {
   const [backend] = useCanister("backend");
   const checkUser = async () => {
     const res = await backend.getMiUser()
+    console.log(await backend.whoAmi());
     console.log(res);
   };
   const { isConnected, principal } = useConnect();
@@ -32,6 +34,7 @@ function App() {
   useEffect(() => {
     if (isConnected){
       console.log(principal)
+      
       checkUser();
     }
   }, [isConnected]);
@@ -53,7 +56,7 @@ function App() {
 const client = createClient({
   canisters: {
     backend,
-    dao,
+    dao
   },
   providers: [
     new InternetIdentity({

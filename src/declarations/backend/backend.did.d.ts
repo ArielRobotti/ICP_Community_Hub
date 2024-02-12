@@ -40,6 +40,7 @@ export interface ICP_Community_Hub {
   >,
   'uploadTutorial' : ActorMethod<[Tutorial], PublishResult>,
   'userConfig' : ActorMethod<[UserSettings], undefined>,
+  'whoAmi' : ActorMethod<[], string>,
 }
 export interface Publication {
   'content' : Tutorial__1,
