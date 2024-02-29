@@ -17,6 +17,13 @@ import Dao "Dao"; //Actor class for deploying the DAO from this canister
 import Types "./types/Types";
 import { tutoIdHash; tutoIdEqual } = "./types/Types";
 
+/*
+asstes: https://ly65v-2yaaa-aaaan-qluwa-cai.icp0.io/
+  Backend canister via Candid interface:
+    backend: https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jmayb-7yaaa-aaaan-qluya-cai
+    internet_identity: https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=rdmx6-jaaaa-aaaaa-aaadq-cai
+*/
+
 shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   public type Tutorial = Types.Tutorial;
@@ -108,12 +115,16 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     }
   };
 
-  func getUser(p : Principal) : ?User {
+  func getUserByPrincipal(p : Principal) : ?User {
     switch (HashMap.get(userIds, Principal.equal, Principal.hash, p)) {
       case null { null };
       case (?userId) { HashMap.get(users, Nat.equal, Nat32.fromNat, userId) }
     }
   };
+  func getUserById(_id: Nat): ?User{
+    HashMap.get(users, Nat.equal, Nat32.fromNat, _id)
+  };
+
 
   func validateEjecution(_caller : Principal) : () {
     ///If the DAO is deployed and _caller is not the DAO it throws an assertion error
@@ -254,7 +265,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
   };
 
   public shared ({ caller }) func userConfig(settings : UserSettings) : async () {
-    switch (getUser(caller)) {
+    switch (getUserByPrincipal(caller)) {
       case null {};
       case (?user) {
         var userId = 0;
@@ -393,7 +404,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   public shared ({ caller }) func qualifyPost(_id : TutoId, q : Nat) : async Bool {
     assert (q >= 1 and q <= 5);
-    switch (getUser(caller)) {
+    switch (getUserByPrincipal(caller)) {
       case (?user) {
         for (postId in user.votedPosts.vals()) {
           if (postId == _id) {
@@ -442,8 +453,8 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     Iter.toArray<User>(HashMap.vals(users))
   };
 
-  public query func getAprovedPublication() : async [(TutoId, Publication)] {
-    return Iter.toArray(HashMap.entries(aprovedPublications))
+  public query func getAprovedPublication() : async [Publication] {
+    return Iter.toArray(HashMap.vals(aprovedPublications))
   };
 
   public query func getPubFromUser(userId : Nat) : async [Publication] {
@@ -451,8 +462,17 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     Array.filter<Publication>(pubs, func x : Bool { x.autor == userId })
   };
 
-  public query func getPubByID(id : Nat) : async ?Publication {
-    HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, id)
+  public query func getPubByID(id : Nat) : async {pub:Publication; autor:Text}{
+    return switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, id)){
+      case null{{pub=Types.PUBLICATION_NOT_FOUND;autor=""}};
+      case (?pub){
+        let autorName = switch(getUserById(pub.autor)){
+          case null{"Anonymous"};
+          case (?user){user.name};
+        };
+        {pub;autor=autorName};     
+      }
+    }
   };
 
   public query func search(target : Text) : async [Publication] {

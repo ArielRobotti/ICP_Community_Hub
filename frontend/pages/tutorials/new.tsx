@@ -21,15 +21,22 @@ const New = () => {
         assets: [],
       }
       console.log(content)
+      let submitBtn = document.getElementById("submitBtn");
+      submitBtn.remove();
       const res = await backend.uploadTutorial(content)
       console.log("Tutorial Created?: ", res)
+      const myForm = document.getElementById("form");
+      if (myForm) {
+        myForm.remove();
+      };
+      document.getElementById("h3").innerText = "Tutorial Ingresado con éxito y a la espera de ser aprobado";
     }
   }
 
   return (
     <div className="p-6 max-w-4xl min-h-[85vh] mx-auto">
-      <h3 className="font-bold text-4xl my-5">Crea tu primer tutorial</h3>
-      <form onSubmit={handleSubmit}>
+      <h3 id="h3" className="font-bold text-4xl my-5">Crea tu primer tutorial</h3>
+      <form id="form" onSubmit={handleSubmit}>
         <div className="flex gap-3 flex-col">
           <div className="mb-3 flex flex-col">
             <label htmlFor="title" className="font-semibold text-2xl">
@@ -80,7 +87,7 @@ const New = () => {
             ></input>
           </div>
         </div>
-        <Button
+        <Button id = "submitBtn"
           primary
           type="submit"
           secondary={undefined}

@@ -1,13 +1,11 @@
 
-import { Actor, HttpAgent } from '@dfinity/agent';
-import * as Dao from '../.dfx/local/canisters/dao/dao.did.js';
-
 
 
 import React, { useEffect } from "react"
 /*
  * Connect2ic provides essential utilities for IC app development
  */
+import { Actor, HttpAgent } from '@dfinity/agent';
 import { createClient } from "@connect2ic/core"
 import { InternetIdentity } from "@connect2ic/core/providers"
 import { Connect2ICProvider, useCanister, useConnect } from "@connect2ic/react"
@@ -15,7 +13,9 @@ import "@connect2ic/core/style.css"
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 
-import * as backend from "../.dfx/local/canisters/backend"
+// import * as backend from "../.dfx/local/canisters/backend"
+import * as backend from "../src/declarations/backend"
+import * as Dao from '../src/declarations/dao';
 
 import Navbar from "./components/layout/Navbar"
 import Footer from "./components/layout/Footer"
@@ -99,6 +99,14 @@ function App() {
     </Router>
   )
 }
+declare let process : {
+  env: {
+    DFX_NETWORK: string
+    NODE_ENV: string
+  }
+}
+const network = process.env.DFX_NETWORK || (process.env.NODE_ENV === "production" ? "ic" : "local");
+const internetIdentityUrl = network === "local" ? "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai" : "https://identity.ic0.app"
 
 const client = createClient({
   canisters: {
@@ -109,7 +117,8 @@ const client = createClient({
       dev: true,
       // The url for the providers frontend
       providerUrl:
-        "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai",
+      internetIdentityUrl,
+        // "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai",
     }),
   ],
   globalProviderConfig: {

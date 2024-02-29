@@ -4,6 +4,7 @@ import path from "path"
 import dfxJson from "./dfx.json"
 import fs from "fs"
 
+process.env.DFX_NETWORK = process.env.DFX_NETWORK || (process.env.NODE_ENV === "production" ? "ic" : "local");
 const isDev = process.env["DFX_NETWORK"] !== "ic"
 
 type Network = "ic" | "local"

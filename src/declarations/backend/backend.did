@@ -72,15 +72,15 @@ type ICP_Community_Hub =
    deleteComment: (TutoId, nat) -> (bool);
    deployDaoCanister: (text, text, vec DaoFounder, nat) -> (principal);
    editComment: (TutoId, nat, text) -> (bool);
-   getAprovedPublication: () -> (vec record {
-                                       TutoId;
-                                       Publication;
-                                     }) query;
+   getAprovedPublication: () -> (vec Publication) query;
    getIncomingPublication: () -> (vec Publication);
    getMiId: () -> (opt nat);
    getMiUser: () -> (opt User);
    getPrincipalDao: () -> (text) query;
-   getPubByID: (nat) -> (opt Publication) query;
+   getPubByID: (nat) -> (record {
+                           autor: text;
+                           pub: Publication;
+                         }) query;
    getPubFromUser: (nat) -> (vec Publication) query;
    getUsers: () -> (vec User) query;
    iamAdmin: () -> (bool);

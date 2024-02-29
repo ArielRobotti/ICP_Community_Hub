@@ -19,12 +19,15 @@ export interface ICP_Community_Hub {
     Principal
   >,
   'editComment' : ActorMethod<[TutoId, bigint, string], boolean>,
-  'getAprovedPublication' : ActorMethod<[], Array<[TutoId, Publication]>>,
+  'getAprovedPublication' : ActorMethod<[], Array<Publication>>,
   'getIncomingPublication' : ActorMethod<[], Array<Publication>>,
   'getMiId' : ActorMethod<[], [] | [bigint]>,
   'getMiUser' : ActorMethod<[], [] | [User]>,
   'getPrincipalDao' : ActorMethod<[], string>,
-  'getPubByID' : ActorMethod<[bigint], [] | [Publication]>,
+  'getPubByID' : ActorMethod<
+    [bigint],
+    { 'pub' : Publication, 'autor' : string }
+  >,
   'getPubFromUser' : ActorMethod<[bigint], Array<Publication>>,
   'getUsers' : ActorMethod<[], Array<User>>,
   'iamAdmin' : ActorMethod<[], boolean>,

@@ -75,6 +75,16 @@ module {
         comments: [Comment];
     };
 
+    public let PUBLICATION_NOT_FOUND: Publication = {
+        id = 0;
+        autor = 0;
+        date = 0:Int; //Timestamp
+        content = {title = ""; description = "";tags = [];html="";assets=[]};
+        qualifyQty=0;
+        qualifySum=0;
+        comments=[];
+    };
+
     public type Comment = {
         id: Nat;
         autor : Principal;
