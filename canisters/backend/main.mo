@@ -17,13 +17,6 @@ import Dao "Dao"; //Actor class for deploying the DAO from this canister
 import Types "./types/Types";
 import { tutoIdHash; tutoIdEqual } = "./types/Types";
 
-/*
-asstes: https://ly65v-2yaaa-aaaan-qluwa-cai.icp0.io/
-  Backend canister via Candid interface:
-    backend: https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jmayb-7yaaa-aaaan-qluya-cai
-    internet_identity: https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=rdmx6-jaaaa-aaaaa-aaadq-cai
-*/
-
 shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   public type Tutorial = Types.Tutorial;
@@ -78,7 +71,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
     assert (isAdmin(caller));
     assert (not _daoIsDeployed()); // This prevents the function from being executed more than once.
-    Internal.cyclesAdd(13_846_199_230 + extraFees); // FEE to create a canister 13 846 199 230
+    Internal.cyclesAdd<system>(13_846_199_230 + extraFees); // FEE to create a canister 13 846 199 230
     let daoCanister = await Dao.Dao(_name, _manifesto, founders); // Creation of canister for the DAO
     DAO := Principal.fromActor(daoCanister);
     return DAO
@@ -121,35 +114,29 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
       case (?userId) { HashMap.get(users, Nat.equal, Nat32.fromNat, userId) }
     }
   };
-  func getUserById(_id: Nat): ?User{
+  func getUserById(_id : Nat) : ?User {
     HashMap.get(users, Nat.equal, Nat32.fromNat, _id)
   };
-
 
   func validateEjecution(_caller : Principal) : () {
     ///If the DAO is deployed and _caller is not the DAO it throws an assertion error
     ///If the DAO is NOT deployed and _caller is not an admin it throws an error
     if (_daoIsDeployed()) {
       assert _caller == DAO
-    } else {
-      (assert isAdmin(_caller))
-    }
+    } else { (assert isAdmin(_caller)) }
   };
   //----- temporarily defined due to communication error between front and DAO ----
-  public shared ({ caller }) func votePublication(_id : TutoId, _vote : Bool): async Bool{
+  public shared ({ caller }) func votePublication(_id : TutoId, _vote : Bool) : async Bool {
     assert isUser(caller);
     assert _daoIsDeployed();
     let date = Time.now();
     let daoActor = actor (Principal.toText(DAO)) : actor {
       votePublication : shared (Principal, TutoId, Int, Bool) -> async Bool
     };
-    return await daoActor.votePublication(caller,_id, date, _vote);
+    return await daoActor.votePublication(caller, _id, date, _vote)
   };
 
-  
-
   //----- if DAO, only DAO, else only admins -----------------------------------
-
 
   public shared ({ caller }) func aprovePublication(id : Nat) : async Result.Result<(), Text> {
     validateEjecution(caller);
@@ -164,11 +151,14 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
           case (?autor) {
             let updatPublications = Buffer.fromArray<TutoId>(autor.postPublicated);
             updatPublications.add(id);
-            let updateAutor = { autor with postPublicated = updatPublications }
-          };
+            let postPublicated = Buffer.toArray<TutoId>(updatPublications);
+            let updateAutor = { autor with postPublicated };
+            HashMap.put<UserId, User>(users, Nat.equal, Nat32.fromNat, tuto.autor, updateAutor);
+            HashMap.put<TutoId, Publication>(aprovedPublications, tutoIdEqual, tutoIdHash, id, tuto );
+            return #ok()
+          }
         };
-        HashMap.put(aprovedPublications, tutoIdEqual, tutoIdHash, id, tuto);
-        return #ok()
+
       }
     }
   };
@@ -247,7 +237,7 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     }
   };
 
-  public shared ({caller}) func iamAdmin():async Bool{isAdmin(caller)};
+  public shared ({ caller }) func iamAdmin() : async Bool { isAdmin(caller) };
 
   public shared ({ caller }) func getMiId() : async ?Nat {
     assert not Principal.isAnonymous(caller);
@@ -432,20 +422,20 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
 
   //---------------- Query functions ------------------------------------------------
 
-  public query func isDaoDeployed():async Bool{_daoIsDeployed()};
+  public query func isDaoDeployed() : async Bool { _daoIsDeployed() };
 
-  public query func getPrincipalDao():async Text{Principal.toText(DAO)};
+  public query func getPrincipalDao() : async Text { Principal.toText(DAO) };
 
-  public shared ({caller}) func userIsDaoMember(): async Bool{
+  public shared ({ caller }) func userIsDaoMember() : async Bool {
     assert (await isDaoDeployed());
     let daoActor = actor (Principal.toText(DAO)) : actor {
-      getPrincipalMembers : shared () -> async [Principal];
-    }; 
-    let members: [Principal] = await daoActor.getPrincipalMembers();
-    for(i in members.vals()){
-      if(i == caller){return true};
+      getPrincipalMembers : shared () -> async [Principal]
     };
-    return false;
+    let members : [Principal] = await daoActor.getPrincipalMembers();
+    for (i in members.vals()) {
+      if (i == caller) { return true }
+    };
+    return false
   };
 
   public query func getUsers() : async [User] {
@@ -462,15 +452,18 @@ shared ({ caller = deployer }) actor class ICP_Community_Hub() = {
     Array.filter<Publication>(pubs, func x : Bool { x.autor == userId })
   };
 
-  public query func getPubByID(id : Nat) : async {pub:Publication; autor:Text}{
-    return switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, id)){
-      case null{{pub=Types.PUBLICATION_NOT_FOUND;autor=""}};
-      case (?pub){
-        let autorName = switch(getUserById(pub.autor)){
-          case null{"Anonymous"};
-          case (?user){user.name};
+  public query func getPubByID(id : Nat) : async {
+    pub : Publication;
+    autor : Text
+  } {
+    return switch (HashMap.get(aprovedPublications, tutoIdEqual, tutoIdHash, id)) {
+      case null { { pub = Types.PUBLICATION_NOT_FOUND; autor = "" } };
+      case (?pub) {
+        let autorName = switch (getUserById(pub.autor)) {
+          case null { "Anonymous" };
+          case (?user) { user.name }
         };
-        {pub;autor=autorName};     
+        { pub; autor = autorName }
       }
     }
   };
